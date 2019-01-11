@@ -1,7 +1,7 @@
-# Flood Risk Dashboard V1
-Exploring new methods in flood risk understanding.  
+# Flood Risk Dashboard V2
+Advancing new methods in flood risk understanding.  
 
-Produced with Plotly's Dash framework, served by Heroku, and available here: https://floodriskdashboard-v1.herokuapp.com/
+Produced with Plotly's Dash framework, served by Heroku, and available here: <insert link when live>
 
 ![Optional Text](../master/assets/screenshot.PNG)
     
