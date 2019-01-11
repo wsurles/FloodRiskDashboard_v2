@@ -1,0 +1,9 @@
+# slug ignore files hosted on github
+/AEP_TOT
+/FDP_TOT
+/FR_TOT
+/jsons
+/R_SCORE
+geojson_factory.py
+imagescrapingtest.py
+initialColormapGenerator.py
