@@ -352,7 +352,7 @@ app.layout = html.Div(children=[
 ~~ APP CALLBACKS ~~
 ~~~~~~~~~~~~~~~~
 '''
-# debugging text - temp
+# streetview image text 
 @app.callback(
     Output('relayout-message', 'children'),
     [Input('risk-map', 'clickData')])
@@ -382,7 +382,7 @@ def display_selected_data(clickData):
         # return src
         return latlon
 
-# debugging image
+# streetview image
 @app.callback(
     Output('image','src'),
     [Input('risk-map', 'clickData')])
