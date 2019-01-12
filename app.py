@@ -32,12 +32,10 @@ import urllib, os
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/dZVMbK.css'] # update from 2017
-# external_stylesheets = ['https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/floodriskdashboard.css'] # adaptation of dash's css fileS
+
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
-
-# app.css.append_css({external_stylesheets})
 
 # Set mapbox public access token
 mapbox_access_token = 'pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A'
@@ -46,14 +44,16 @@ mapbox_access_token = 'pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aX
 key = "&key=" + "AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI" #key
 
 # Data sources
-custom_geometry_points = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/S_CustomGeometries_centroids.csv'
-structure_points = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/S_Structure_centroids.csv'
-geojson_structures  ='https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/S_Structure.json'
-geojson_census = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/S_CustomGeometries.json'
-geojson_confidence = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/S_Confidence.json'
-geojson_100yr = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/S_FHAD_100yr.json'
-geojson_500yr = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/S_FHAD_500yr.json'
-narrative_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/narrative.txt'
+repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
+
+custom_geometry_points = repo_url + '/master/S_CustomGeometries_centroids.csv'
+structure_points = repo_url + '/master/S_Structure_centroids.csv'
+geojson_structures = repo_url + '/master/jsons/S_Structure.json'
+geojson_census = repo_url + '/master/jsons/S_CustomGeometries.json'
+geojson_confidence = repo_url + '/master/jsons/S_Confidence.json'
+geojson_100yr = repo_url + '/master/jsons/S_FHAD_100yr.json'
+geojson_500yr = repo_url + '/master/jsons/S_FHAD_500yr.json'
+narrative_url = repo_url + '/master/narrative.txt'
 
 # Load Data 
 df_cg = pd.read_csv(custom_geometry_points)
@@ -73,8 +73,8 @@ DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159,
 
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
-mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
-# mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+# mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
+mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 
 # Define symbology for json layers
 geo_index = [
@@ -282,12 +282,33 @@ app.layout = html.Div(children=[
                 }
                 ),
                 # html.Pre(id='click-data', style=styles['pre']),
-            ], className="row")
+            ], className="row"),
+            html.Div([
+                html.Pre(
+                    id='relayout-message', 
+                    style=styles['pre']
+                ),
+                html.Img(
+                    id='image',
+                    src=' ', 
+                    className='three columns',
+                    style={
+                        'height': '100px',
+                        # 'width': '200px',
+                        'float': 'center',
+                        # 'position': 'relative',
+                        # 'margin-top': '10px',
+                        # 'margin-right': '10px'
+                    }
+                ),
+                html.Br()
+            ], className='row')
         ], className='six columns'),
-    ], className="row"),
+    ], className='row'),
 
     # debugging text, comment out after testing
     # html.Pre(id='relayout-message', style=styles['pre']),
+    # html.Img(src=' ', id='image'),
     
     html.Div([
         dcc.Graph(
@@ -332,36 +353,72 @@ app.layout = html.Div(children=[
 ~~~~~~~~~~~~~~~~
 '''
 # debugging text - temp
-# @app.callback(
-#     Output('relayout-message', 'children'),
-#     [Input('risk-map', 'clickData')])
-#     # [Input('risk-checklist', 'values')],
-#     # [State('risk-map', 'relayoutData')])
-# def display_selected_data(clickData):
-#     if clickData==None:
-#         src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
-#         return src #,relayoutData):
-#     # return json.dumps(relayoutData, indent=2)
-#     # return json.dumps(str(type(relayoutData)), indent=2)
-#     # tempstring = str(type(relayoutData))
-#     # trace_lat = clickData['points'][0]['lat']
-#     # trace_lon = clickData['points'][0]['lon']
-#     # latlon = str(trace_lat) + ', ' + str(trace_lon)
-#     # latlon = f'"{latlon}"'
-#     else:
-#         def GetStreet(Address):
-#             base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
-#             MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
-#             return MyUrl
+@app.callback(
+    Output('relayout-message', 'children'),
+    [Input('risk-map', 'clickData')])
+def display_selected_data(clickData):
+    if clickData==None:
+        # src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
+        # return src #,relayoutData):
+        return str((39,-105))
+        # return json.dumps(relayoutData, indent=2)
+    else:
 
-#         trace_lat = clickData['points'][0]['lat']
-#         trace_lon = clickData['points'][0]['lon']
-#         latlon = str(trace_lat) + ', ' + str(trace_lon)
-#         latlon = f'"{latlon}"'
+        # def GetStreet(Address):
+        #     base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
+        #     MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
+        #     fi = Address + ".jpg"
+        #     urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc,fi))
+        #     return MyUrl
 
-#         # latlon = str(trace_lat) + ', ' + str(trace_lon)
-#         src=GetStreet(latlon)
-#         return src
+        trace_lat = round(clickData['points'][0]['lat'],6)
+        trace_lon = round(clickData['points'][0]['lon'],6)
+        latlon = str(trace_lat) + ', ' + str(trace_lon)
+        # latlon = f'"{latlon}"'
+        # return latlon
+
+        # latlon = str(trace_lat) + ', ' + str(trace_lon)
+        # src=GetStreet(latlon)
+        # return src
+        return latlon
+
+# debugging image
+@app.callback(
+    Output('image','src'),
+    [Input('risk-map', 'clickData')])
+def update_image(clickData):
+    if clickData==None:
+        # src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
+        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.729898%2C%20-105.166717&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
+        src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.668626%2C%20-105.095589&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
+        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.754305%2C%20-105.0083181&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'    
+    else:
+        # saveLoc='streetview_imgs'
+        saveLoc='assets'
+        def GetStreet(Address):
+            base = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location='
+            img_url = base + urllib.parse.quote(Address) + key #added url encoding
+            img_name = Address + ".jpg"
+            path_name = os.path.join(saveLoc,img_name)
+            urllib.request.urlretrieve(img_url, path_name)
+            # return img_url
+            return path_name
+
+        trace_lat = round(clickData['points'][0]['lat'], 6)
+        trace_lon = round(clickData['points'][0]['lon'], 6)
+        latlon = str(trace_lat) + ', ' + str(trace_lon)
+        # latlon = f'{latlon}'
+        # return latlon
+        
+        # latlon = str(trace_lat) + ', ' + str(trace_lon)
+        src=GetStreet(latlon)
+
+        print(latlon)
+        print(src)
+        # print(trace_lat)
+    
+    return src
+
 
 
 

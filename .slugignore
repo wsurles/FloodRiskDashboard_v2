@@ -1,4 +1,4 @@
-# slug ignore files hosted on github
+# slug ignore files: list below is removed from heroku deployments, hosted elsewhere...
 /AEP_TOT
 /FDP_TOT
 /FR_TOT

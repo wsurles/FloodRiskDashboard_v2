@@ -18,17 +18,22 @@ import plotly.graph_objs as go
 app = dash.Dash(__name__)
 server = app.server
 
-SaveLoc = '' #location for images
+SaveLoc = 'assets' #location for images
 key = "&key=" + "AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI" #key
 
-def GetStreet(Address,SaveLoc):
+# def GetStreet(Address,SaveLoc):
+#     base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
+#     MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
+#     fi = Address + ".jpg"
+#     print(fi)
+#     urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc,fi))
+#     therequest = urllib.request.urlretrieve(MyUrl)
+#     print(therequest)
+#     return MyUrl
+
+def GetStreet(Address):
     base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
     MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
-    fi = Address + ".jpg"
-    print(fi)
-    urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc,fi))
-    therequest = urllib.request.urlretrieve(MyUrl)
-    print(therequest)
     return MyUrl
 
 
@@ -37,6 +42,16 @@ def GetStreet(Address,SaveLoc):
 
 
 # image_URL = GetStreet(LatLongTests[0])
+
+# Styles for click-data 
+styles = {
+    'pre': {
+        'border': 'none',
+        'overflowX': 'visible'
+    }
+}
+
+
 
 app.layout = html.Div([
     # html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()))
@@ -61,16 +76,19 @@ app.layout = html.Div([
                 'left': '50px'
             },
         ),
+        html.Br(),
         html.Img(id='simple_img', src=" ",
             style={
                 'height':'200',
                 'width':'200',
-                'float':'left',
-                'position': 'relative',
-                'bottom': '40px',
-                'left': '50px'
+            #     'float':'left',
+            #     'position': 'relative',
+            #     'bottom': '40px',
+            #     'left': '50px'
             }
-        )
+        ),
+        html.Br(),
+        html.Pre(id='relayout-message', style=styles['pre']),
     ],style=dict(height='200', width="400"),
 )
 
@@ -80,8 +98,22 @@ app.layout = html.Div([
     Output('simple_img', 'src'),
     [Input('latlon_dropdown', 'value')])
 def update_image_src(value):
-    src=GetStreet(value, SaveLoc)
+    # src=GetStreet(value, SaveLoc)
+    src=GetStreet(value)
     return src
+
+
+
+@app.callback(
+    Output('relayout-message', 'children'),
+    [Input('latlon_dropdown', 'value')])
+def update_image_src(value):
+    # src=GetStreet(value, SaveLoc)
+    src=GetStreet(value)
+    print(value)
+    print(src)
+    # print(src)
+    return value
 
 
 
