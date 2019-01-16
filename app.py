@@ -14,10 +14,10 @@
 # video tutorial using boilerplate boostrap css  --  https://www.youtube.com/watch?v=f2qUWgq7fb8
 
 # -*- coding: utf-8 -*-
-import json
+# import json
 import pandas as pd
 import requests
-from flask import Flask
+# from flask import Flask
 import dash
 from dash.dependencies import Input, Output, State, Event
 import dash_core_components as dcc
@@ -390,15 +390,16 @@ def update_image(clickData):
     if clickData==None:
         # src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
         # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.729898%2C%20-105.166717&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
-        src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.668626%2C%20-105.095589&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
-        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.754305%2C%20-105.0083181&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'    
+        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.668626%2C%20-105.095589&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
+        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.754305%2C%20-105.0083181&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'  
+        src = 'assets/floodriskplaceholder.png'  
     else:
         # saveLoc='streetview_imgs'
         saveLoc='assets'
         def GetStreet(Address):
             base = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location='
             img_url = base + urllib.parse.quote(Address) + key #added url encoding
-            img_name = Address + ".jpg"
+            img_name = 'gsvImg_' + Address + ".jpg"
             path_name = os.path.join(saveLoc,img_name)
             urllib.request.urlretrieve(img_url, path_name)
             # return img_url
