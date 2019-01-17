@@ -14,10 +14,11 @@
 # video tutorial using boilerplate boostrap css  --  https://www.youtube.com/watch?v=f2qUWgq7fb8
 
 # -*- coding: utf-8 -*-
-# import json
+import json
 import pandas as pd
+import geopandas as gpd
 import requests
-# from flask import Flask
+
 import dash
 from dash.dependencies import Input, Output, State, Event
 import dash_core_components as dcc
@@ -28,7 +29,8 @@ import plotly.graph_objs as go
 from urllib.parse import quote
 import urllib.request
 import urllib, os
-# import base64
+
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/dZVMbK.css'] # update from 2017
@@ -48,17 +50,19 @@ repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
 
 custom_geometry_points = repo_url + '/master/S_CustomGeometries_centroids.csv'
 structure_points = repo_url + '/master/S_Structure_centroids.csv'
-geojson_structures = repo_url + '/master/jsons/S_Structure.json'
+# geojson_structures = repo_url + '/master/jsons/S_Structure.json'
 geojson_census = repo_url + '/master/jsons/S_CustomGeometries.json'
 geojson_confidence = repo_url + '/master/jsons/S_Confidence.json'
 geojson_100yr = repo_url + '/master/jsons/S_FHAD_100yr.json'
 geojson_500yr = repo_url + '/master/jsons/S_FHAD_500yr.json'
-narrative_url = repo_url + '/master/narrative.txt'
+# narrative_url = repo_url + '/master/narrative.txt'
+structures_shp = ('shp/S_Structure.shp')
 
 # Load Data 
 df_cg = pd.read_csv(custom_geometry_points)
 df_structures = pd.read_csv(structure_points)
-narrative = (requests.get(narrative_url)).text
+# narrative = (requests.get(narrative_url)).text
+struct_df = gpd.read_file(structures_shp)
 
 # Define confidence interval steps for slider
 steps = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0]
@@ -78,43 +82,43 @@ mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 
 # Define symbology for json layers
 geo_index = [
-    'S_Structure',         # structures index
+    # 'S_Structure',         # structures index
     'S_CustomGeometries',  # census blocks index
     'S_Confidence',        # confidence index
     'S_100yr',             # 100yr index
     'S_500yr']             # 500yr index
 sourcetype = [
-    'geojson', # structures sourcetype
+    # 'geojson', # structures sourcetype
     'geojson', # census sourcetype
     'geojson', # confidence sourcetype
     'geojson', # 100yr sourcetype
     'geojson'] # 500yr sourcetype
 color = [
-    '#D3D3D3', # structures color
+    # '#D3D3D3', # structures color
     '#484848', # census blocks color
     '#80b3ff', # confidence color
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    0.3,    # structures opacity
+    # 0.3,    # structures opacity
     0.4,  # census blocks opacity
     1,  # confidence opacity
     0.5,  # 100yr opacity
     0.7]  # 500yr opacity
 symbology_type = [
-    'fill',  # structures symbology
+    # 'fill',  # structures symbology
     'line',  # census block symbology
     'line',  # confidence symbology
     'fill',  # 100yr symbology
     'fill']  # 500yr symbology
 json_file = [
-    'S_Structure.json',         # structures json
+    # 'S_Structure.json',         # structures json
     'S_CustomGeometries.json',  # census blocks json
     'S_Confidence.json',        # confidence json
     'S_FHAD_100yr.json',        # 100yr json
     'S_FHAD_500yr.json']        # 500yr json
 below_symbology = [
-    'water',
+    # 'water',
     'S_500yr',
     'water',
     'S_Confidence',
@@ -190,7 +194,8 @@ app.layout = html.Div(children=[
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                values=['S_Structure', 'S_100yr'],
+                # values=['S_Structure', 'S_100yr'],
+                values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
 
@@ -661,9 +666,13 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
     )
 
     # Define base urls for use in creating geolayers
-    base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr']
-    base_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/jsons/'
-    base_risk_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/'
+    # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
+    base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
+    # repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
+    base_url = repo_url + '/master/jsons/' #v2
+    base_risk_url = repo_url + '/master/' #v2
+    # base_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2/master/jsons/' #v1
+    # base_risk_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2/master/' #v2
 
     for i in values:
         # Add base layers to layout if in checklist
@@ -689,16 +698,49 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
             layout['mapbox']['layers'].append(geo_layer)
         # Add risk scoring type if selected in checkbox
         if 'S_Structure' in values:
+            # dataset_10 = struct_df[struct_df['R_SCORE'].between(0,10,inclusive=False)]
+            # dataset_20 = struct_df[struct_df['R_SCORE'].between(10,20,inclusive=False)]
+            # dataset_30 = struct_df[struct_df['R_SCORE'].between(20,30,inclusive=False)]
+            # dataset_40 = struct_df[struct_df['R_SCORE'].between(30,40,inclusive=False)]
+            # dataset_50 = struct_df[struct_df['R_SCORE'].between(40,30,inclusive=False)]
+            # dataset_60 = struct_df[struct_df['R_SCORE'].between(40,50,inclusive=False)]
+            # dataset_70 = struct_df[struct_df['R_SCORE'].between(50,60,inclusive=False)]
+            # dataset_80 = struct_df[struct_df['R_SCORE'].between(60,70,inclusive=False)]
+            # dataset_90 = struct_df[struct_df['R_SCORE'].between(80,90,inclusive=False)]
+            # dataset_100 = struct_df[struct_df['R_SCORE'].between(80,90,inclusive=False)]
+    
             for bin in BINS:
+                # parse the low and high values for bin
+                low = int(bin.split('-')[0])
+                high = int(bin.split('-')[1]) 
+
+                # query the structure dataframe for values in each bin range by user's dropdown value
+                bin_data = struct_df[struct_df[dropdownvalue].between(low,high,inclusive=False)]
+                bin_json = json.loads(bin_data.to_json())
+
+                #v2
                 geo_layer = dict(
                         sourcetype = 'geojson',
-                        # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
-                        source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
+                        source = bin_json,
+                        # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                         type ='fill',
                         color = cm[bin],
                         # color = '#f4f442',
                         opacity = 0.8
                     )
+                
+                #v1
+                # geo_layer = dict(
+                #         sourcetype = 'geojson',
+                #         # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
+                #         source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
+                #         type ='fill',
+                #         color = cm[bin],
+                #         # color = '#f4f442',
+                #         opacity = 0.8
+                #     )
+
+
                 layout['mapbox']['layers'].append(geo_layer)
 
     figure = dict(data=data,layout=layout)
