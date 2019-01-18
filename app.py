@@ -82,44 +82,44 @@ mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 
 # Define symbology for json layers
 geo_index = [
-    # 'S_Structure',         # structures index
-    'S_CustomGeometries',  # census blocks index
+    'S_Structure',         # structures index
+    # 'S_CustomGeometries',  # census blocks index
     'S_Confidence',        # confidence index
     'S_100yr',             # 100yr index
     'S_500yr']             # 500yr index
 sourcetype = [
-    # 'geojson', # structures sourcetype
-    'geojson', # census sourcetype
+    'geojson', # structures sourcetype
+    # 'geojson', # census sourcetype
     'geojson', # confidence sourcetype
     'geojson', # 100yr sourcetype
     'geojson'] # 500yr sourcetype
 color = [
-    # '#D3D3D3', # structures color
-    '#484848', # census blocks color
+    '#D3D3D3', # structures color
+    # '#484848', # census blocks color
     '#80b3ff', # confidence color
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    # 0.3,    # structures opacity
-    0.4,  # census blocks opacity
+    0.3,    # structures opacity
+    # 0.4,  # census blocks opacity
     1,  # confidence opacity
     0.5,  # 100yr opacity
     0.7]  # 500yr opacity
 symbology_type = [
-    # 'fill',  # structures symbology
-    'line',  # census block symbology
+    'fill',  # structures symbology
+    # 'line',  # census block symbology
     'line',  # confidence symbology
     'fill',  # 100yr symbology
     'fill']  # 500yr symbology
 json_file = [
-    # 'S_Structure.json',         # structures json
-    'S_CustomGeometries.json',  # census blocks json
+    'S_Structure.json',         # structures json
+    # 'S_CustomGeometries.json',  # census blocks json
     'S_Confidence.json',        # confidence json
     'S_FHAD_100yr.json',        # 100yr json
     'S_FHAD_500yr.json']        # 500yr json
 below_symbology = [
-    # 'water',
-    'S_500yr',
+    'water',
+    # 'S_500yr',
     'water',
     'S_Confidence',
     'S_100yr']
@@ -141,14 +141,16 @@ all_options=[
     {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE'},
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
     {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
-    {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'}
+    {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
+    {'label': 'User Defined Risk Weighting', 'value': 'USER'}
 ]
 
 no_options=[
     {'label': 'Total Risk Score', 'value': 'R_SCORE', 'disabled': True},
     {'label': 'Flood Risk Score', 'value': 'FR_TOT', 'disabled': True},
     {'label': 'Annual Exceedance Probability', 'value': 'AEP_TOT', 'disabled': True},
-    {'label': 'Flood Damage Potential', 'value': 'FDP_TOT', 'disabled': True}
+    {'label': 'Flood Damage Potential', 'value': 'FDP_TOT', 'disabled': True},
+    {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
 ]
 
 customdatalist = [df_structures['R_SCORE'], df_structures['FR_TOT'], df_structures['AEP_TOT'], df_structures['FDP_TOT']]
@@ -190,12 +192,12 @@ app.layout = html.Div(children=[
                 options=[
                     {'label': 'Display Structure Based Flood Risk', 'value': 'S_Structure'},
                     {'label': 'Display Probabilistic Floodplain Modeling', 'value': 'S_Confidence'},
-                    {'label': 'Display Sociovulnerability to Flood Hazards', 'value': 'S_CustomGeometries'},
+                    # {'label': 'Display Sociovulnerability to Flood Hazards', 'value': 'S_CustomGeometries'},
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                # values=['S_Structure', 'S_100yr'],
-                values=['S_100yr'],
+                values=['S_Structure', 'S_100yr'],
+                # values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
 
@@ -240,7 +242,16 @@ app.layout = html.Div(children=[
                     # dcc.Markdown("""New Select Color Map"""
                     # )
                 ], className='five columns'),
+            ], className="row"),
+
+            html.Div([
+                dcc.RangeSlider(
+                min=0,
+                max=100,
+                value=[10, 20, 30, 50]
+                )
             ], className="row")
+
         ], className='six columns'),
 
         # html.P(id='dropdown-message'),
@@ -666,8 +677,8 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
     )
 
     # Define base urls for use in creating geolayers
-    # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
-    base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
+    base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
+    # base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
     # repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
@@ -697,48 +708,40 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
             )
             layout['mapbox']['layers'].append(geo_layer)
         # Add risk scoring type if selected in checkbox
-        if 'S_Structure' in values:
-            # dataset_10 = struct_df[struct_df['R_SCORE'].between(0,10,inclusive=False)]
-            # dataset_20 = struct_df[struct_df['R_SCORE'].between(10,20,inclusive=False)]
-            # dataset_30 = struct_df[struct_df['R_SCORE'].between(20,30,inclusive=False)]
-            # dataset_40 = struct_df[struct_df['R_SCORE'].between(30,40,inclusive=False)]
-            # dataset_50 = struct_df[struct_df['R_SCORE'].between(40,30,inclusive=False)]
-            # dataset_60 = struct_df[struct_df['R_SCORE'].between(40,50,inclusive=False)]
-            # dataset_70 = struct_df[struct_df['R_SCORE'].between(50,60,inclusive=False)]
-            # dataset_80 = struct_df[struct_df['R_SCORE'].between(60,70,inclusive=False)]
-            # dataset_90 = struct_df[struct_df['R_SCORE'].between(80,90,inclusive=False)]
-            # dataset_100 = struct_df[struct_df['R_SCORE'].between(80,90,inclusive=False)]
-    
+        if 'S_Structure' in values:    
             for bin in BINS:
-                # parse the low and high values for bin
-                low = int(bin.split('-')[0])
-                high = int(bin.split('-')[1]) 
+                # Calculate geolayer if user defined weighting is selected
+                if 'USER' in dropdownvalue:
+                    # parse the low and high values for bin
+                    low = int(bin.split('-')[0])
+                    high = int(bin.split('-')[1]) 
 
-                # query the structure dataframe for values in each bin range by user's dropdown value
-                bin_data = struct_df[struct_df[dropdownvalue].between(low,high,inclusive=False)]
-                bin_json = json.loads(bin_data.to_json())
+                    # query the structure dataframe for values in each bin range by user's dropdown value
+                    bin_data = struct_df[struct_df[dropdownvalue].between(low,high,inclusive=False)]
+                    bin_json = json.loads(bin_data.to_json())
 
-                #v2
-                geo_layer = dict(
-                        sourcetype = 'geojson',
-                        source = bin_json,
-                        # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
-                        type ='fill',
-                        color = cm[bin],
-                        # color = '#f4f442',
-                        opacity = 0.8
+                    geo_layer = dict(
+                            sourcetype = 'geojson',
+                            source = bin_json,
+                            # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
+                            type ='fill',
+                            fill-outline-color = cm[bin],
+                            color = cm[bin],
+                            # color = '#f4f442',
+                            opacity = 0.8
                     )
-                
-                #v1
-                # geo_layer = dict(
-                #         sourcetype = 'geojson',
-                #         # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
-                #         source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
-                #         type ='fill',
-                #         color = cm[bin],
-                #         # color = '#f4f442',
-                #         opacity = 0.8
-                #     )
+                # Serve prebuilt geolayer if not user defined weighting
+                else:
+                    geo_layer = dict(
+                            sourcetype = 'geojson',
+                            # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
+                            source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
+                            type ='fill',
+                            fill-outline-color = cm[bin],
+                            color = cm[bin],
+                            # color = '#f4f442',
+                            opacity = 0.8
+                    )
 
 
                 layout['mapbox']['layers'].append(geo_layer)
