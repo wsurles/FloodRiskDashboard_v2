@@ -483,8 +483,9 @@ def display_click_data(clickData):
     if clickData==None:
         pass
     else:
-        pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
-        structFID = pointnumber+1  # 1 based index FID number from spatial data
+        structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        # pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        # structFID = pointnumber+1  # 1 based index FID number from spatial data
         totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
         floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
         annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
@@ -532,10 +533,11 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
             )
         )
     else:
-        pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        # pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
         trace_lat = clickData['points'][0]['lat']
         trace_lon = clickData['points'][0]['lon']
-        structFID = pointnumber+1  # 1 based index FID number from spatial data
+        # structFID = pointnumber+1  # 1 based index FID number from spatial data
         totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
         floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
         annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
@@ -712,12 +714,14 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
             for bin in BINS:
                 # Calculate geolayer if user defined weighting is selected
                 if 'USER' in dropdownvalue:
+                    struct_dff = struct_df.copy()
+                    struct_dff['USER'] = struct_df['R_SCORE']
                     # parse the low and high values for bin
                     low = int(bin.split('-')[0])
                     high = int(bin.split('-')[1]) 
 
                     # query the structure dataframe for values in each bin range by user's dropdown value
-                    bin_data = struct_df[struct_df[dropdownvalue].between(low,high,inclusive=False)]
+                    bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
                     bin_json = json.loads(bin_data.to_json())
 
                     geo_layer = dict(
@@ -725,7 +729,7 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                             source = bin_json,
                             # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
-                            fill-outline-color = cm[bin],
+                            # fill-outline-color = cm[bin],
                             color = cm[bin],
                             # color = '#f4f442',
                             opacity = 0.8
@@ -737,7 +741,7 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                             # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
                             source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
-                            fill-outline-color = cm[bin],
+                            # fill-outline-color = cm[bin],
                             color = cm[bin],
                             # color = '#f4f442',
                             opacity = 0.8
