@@ -12,6 +12,7 @@
 # bootstrap and dash layouts  --  https://dash-bootstrap-components.opensource.asidatascience.com/l/components/layout
 # example of bootstrap/dash boilderplate  --  https://github.com/ned2/slapdash
 # video tutorial using boilerplate boostrap css  --  https://www.youtube.com/watch?v=f2qUWgq7fb8
+# flexbox tutorial for sizing div items  --  https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 # -*- coding: utf-8 -*-
 import json
@@ -196,7 +197,7 @@ app.layout = html.Div(children=[
                 className='three columns',
                 style={
                     # 'height': '90%',
-                    'width': '100px',
+                    'width': '120px',
                     'float': 'right',
                     'position': 'relative',
                     'margin-top': '10px',
@@ -270,7 +271,8 @@ app.layout = html.Div(children=[
         style={
             'background-color':'white',
             'margin-right': '0px', 
-            'flex':1,
+            # 'flex':1,
+            'flex-basis': '40%',
             # 'display':'inline-block',
             # 'width':'100%',
             'padding':'10px', 
@@ -296,6 +298,7 @@ app.layout = html.Div(children=[
             dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
             """),
 
+            # selected structure risk components
             html.Div([
                 html.Div([
                     dcc.Graph(
@@ -303,37 +306,41 @@ app.layout = html.Div(children=[
                         config={'displayModeBar': False
                         }
                     ),
-                ], className='six columns',
-                style={
-                    }
-                ),
+                ], className='two columns',
+                style = {
+                    'flex':1,
+                }),
+                html.Div([
+                    html.Img(
+                        id='image',
+                        src=' ', 
+                        height = '100px',
+                        width = '100px'
+                    ),
+                ], className='two columns',
+                style = {
+                    # 'height': '100px',
+                    # 'width': '100px',
+                    'margin-top': '32px',
+                    'display': 'flex',
+                    # 'justify-content': 'right',
+                    # 'flex':1,
+                }),
                 html.Div([
                     html.Pre(id='click-data', style=styles['pre'])
-                ], className='six columns',
+                ], className='four columns',
                 style={
                     # 'float': 'right', 
                     'text-align': 'left',
                     'vertical-align':'bottom',
                     'position':'relative',
-                    'margin-top': '40px'
-                }),
-            ], className="row"),
-            html.Div([
-                html.Pre(
-                    id='relayout-message', 
-                    style=styles['pre']
-                ),
-                html.Img(
-                    id='image',
-                    src=' ', 
-                    className='three columns',
-                    style={
-                        'height': '100px',
-                        'float': 'center',
-                    }
-                ),
-                html.Br()
-            ], className='row')
+                    'margin-top': '40px',
+                    'flex':1,
+                })
+            ], className='row',
+            style = {
+                'display': 'flex'
+            }),
         ], className='seven columns',
         style={
             'background-color':'white', 
@@ -343,7 +350,8 @@ app.layout = html.Div(children=[
             # 'width':'100%',
             'padding':'10px', 
             'border-radius': '3px',
-            'flex':1,
+            # 'flex':1,
+            'flex-basis': '60%',
             # 'width': '60.27%',
             # 'margin-top':'5px'
         }
@@ -426,21 +434,21 @@ app.layout = html.Div(children=[
 
 
 
-# streetview image text 
-@app.callback(
-    Output('relayout-message', 'children'),
-    [Input('risk-map', 'clickData')])
-def display_selected_data(clickData):
-    if clickData==None:
-        pass
-        # return str((39,-105))
-        # return json.dumps(relayoutData, indent=2)
-    else: 
-        pass
-        # trace_lat = round(clickData['points'][0]['lat'],6)
-        # trace_lon = round(clickData['points'][0]['lon'],6)
-        # latlon = str(trace_lat) + ', ' + str(trace_lon)
-        # return latlon
+# # streetview image text 
+# @app.callback(
+#     Output('relayout-message', 'children'),
+#     [Input('risk-map', 'clickData')])
+# def display_selected_data(clickData):
+#     if clickData==None:
+#         pass
+#         # return str((39,-105))
+#         # return json.dumps(relayoutData, indent=2)
+#     else: 
+#         pass
+#         # trace_lat = round(clickData['points'][0]['lat'],6)
+#         # trace_lon = round(clickData['points'][0]['lon'],6)
+#         # latlon = str(trace_lat) + ', ' + str(trace_lon)
+#         # return latlon
 
 # streetview image
 @app.callback(
@@ -516,7 +524,11 @@ def update_slider_message(value, values):
     [Input('risk-map', 'clickData')])
 def display_click_data(clickData):
     if clickData==None:
-        pass
+        click_message = f"Total Risk Score: " + '\n' + \
+            f"Flood Risk: " + '\n' +  \
+            f"Annual Exceedence Probability: " + '\n' + \
+            f"Flood Damage Potential: "
+        return click_message
     else:
         structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
         # pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
