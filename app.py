@@ -18,6 +18,7 @@ import json
 import pandas as pd
 import geopandas as gpd
 import requests
+import time
 
 import dash
 from dash.dependencies import Input, Output, State, Event
@@ -33,6 +34,7 @@ import urllib, os
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
+# external_stylesheets = ['https://bootswatch.com/4/cerulean/bootstrap.css']
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/dZVMbK.css'] # update from 2017
 
 
@@ -50,7 +52,7 @@ repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
 
 custom_geometry_points = repo_url + '/master/S_CustomGeometries_centroids.csv'
 structure_points = repo_url + '/master/S_Structure_centroids.csv'
-# geojson_structures = repo_url + '/master/jsons/S_Structure.json'
+geojson_structures = repo_url + '/master/jsons/S_Structure.json'
 geojson_census = repo_url + '/master/jsons/S_CustomGeometries.json'
 geojson_confidence = repo_url + '/master/jsons/S_Confidence.json'
 geojson_100yr = repo_url + '/master/jsons/S_FHAD_100yr.json'
@@ -77,8 +79,8 @@ DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159,
 
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
-# mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
-mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
+# mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 
 # Define symbology for json layers
 geo_index = [
@@ -100,7 +102,7 @@ color = [
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    0.3,    # structures opacity
+    1,    # structures opacity
     # 0.4,  # census blocks opacity
     1,  # confidence opacity
     0.5,  # 100yr opacity
@@ -220,14 +222,10 @@ app.layout = html.Div(children=[
             html.Br(),
 
             html.Div([
-                # dcc.Markdown("""*Select Color Map*""",
-                #     className='three columns'
-                # ),
                 html.Div([
                     html.P(children='Select Color Map',
                         style={
                             'float': 'right', 
-                            # 'horizontal-align':'right',
                             'position':'relative',
                             'margin-top': '10px'}
                         )
@@ -239,8 +237,6 @@ app.layout = html.Div(children=[
                         nSwatches=10,
                         fixSwatches=True,
                     ),
-                    # dcc.Markdown("""New Select Color Map"""
-                    # )
                 ], className='five columns'),
             ], className="row"),
 
@@ -253,8 +249,6 @@ app.layout = html.Div(children=[
             ], className="row")
 
         ], className='six columns'),
-
-        # html.P(id='dropdown-message'),
 
         html.Div([
             html.Br(),
@@ -271,7 +265,6 @@ app.layout = html.Div(children=[
 
             html.Br(),
 
-            # html.Div([
             dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
             """),
 
@@ -297,7 +290,6 @@ app.layout = html.Div(children=[
                     'margin-top': '40px'
                 }
                 ),
-                # html.Pre(id='click-data', style=styles['pre']),
             ], className="row"),
             html.Div([
                 html.Pre(
@@ -310,11 +302,7 @@ app.layout = html.Div(children=[
                     className='three columns',
                     style={
                         'height': '100px',
-                        # 'width': '200px',
                         'float': 'center',
-                        # 'position': 'relative',
-                        # 'margin-top': '10px',
-                        # 'margin-right': '10px'
                     }
                 ),
                 html.Br()
@@ -344,7 +332,8 @@ app.layout = html.Div(children=[
                     opacity = 0,
                 ),
                 layout = dict(
-                    height = 600,
+                    # height = 600,
+                    height = 1200,
                     mapbox = dict(
                         layers = [],
                         accesstoken = mapbox_access_token,
@@ -374,28 +363,12 @@ app.layout = html.Div(children=[
     [Input('risk-map', 'clickData')])
 def display_selected_data(clickData):
     if clickData==None:
-        # src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
-        # return src #,relayoutData):
         return str((39,-105))
         # return json.dumps(relayoutData, indent=2)
     else:
-
-        # def GetStreet(Address):
-        #     base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
-        #     MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
-        #     fi = Address + ".jpg"
-        #     urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc,fi))
-        #     return MyUrl
-
         trace_lat = round(clickData['points'][0]['lat'],6)
         trace_lon = round(clickData['points'][0]['lon'],6)
         latlon = str(trace_lat) + ', ' + str(trace_lon)
-        # latlon = f'"{latlon}"'
-        # return latlon
-
-        # latlon = str(trace_lat) + ', ' + str(trace_lon)
-        # src=GetStreet(latlon)
-        # return src
         return latlon
 
 # streetview image
@@ -403,14 +376,9 @@ def display_selected_data(clickData):
     Output('image','src'),
     [Input('risk-map', 'clickData')])
 def update_image(clickData):
-    if clickData==None:
-        # src = "https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe.png"
-        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.729898%2C%20-105.166717&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
-        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.668626%2C%20-105.095589&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'
-        # src = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.754305%2C%20-105.0083181&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI'  
+    if clickData==None:  
         src = 'assets/floodriskplaceholder.png'  
     else:
-        # saveLoc='streetview_imgs'
         saveLoc='assets'
         def GetStreet(Address):
             base = 'https://maps.googleapis.com/maps/api/streetview?size=1200x800&location='
@@ -424,15 +392,11 @@ def update_image(clickData):
         trace_lat = round(clickData['points'][0]['lat'], 6)
         trace_lon = round(clickData['points'][0]['lon'], 6)
         latlon = str(trace_lat) + ', ' + str(trace_lon)
-        # latlon = f'{latlon}'
-        # return latlon
-        
-        # latlon = str(trace_lat) + ', ' + str(trace_lon)
+
         src=GetStreet(latlon)
 
         print(latlon)
         print(src)
-        # print(trace_lat)
     
     return src
 
@@ -574,35 +538,6 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
 
 
 
-# update structure image
-# @app.callback(
-#     Output('structure_img', 'src'),
-#     [Input('risk-map', 'clickData')])
-# def update_image_src(clickData):
-#     if clickData==None:
-#         src="https://maps.googleapis.com/maps/api/streetview?size=1200x800&location=39.72789001%2C%20-105.01937099999999&key=AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI"
-#     else:
-#         def GetStreet(Address, SaveLoc):
-#             base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
-#             MyUrl = base + urllib.parse.quote(Address) + key #added url encoding
-#             fi = Address + ".jpg"
-#             urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc,fi))
-#             imagepath = os.path.join(SaveLoc,fi)
-#             return imagepath
-#             # return MyUrl
-
-#         # SaveLoc = ''
-#         SaveLoc = 'assets/'
-#         trace_lat = clickData['points'][0]['lat']
-#         trace_lon = clickData['points'][0]['lon']
-
-#         latlon = str(trace_lat) + ', ' + str(trace_lon)
-#         src=GetStreet(latlon, SaveLoc)
-#         print(latlon, src, MyUrl)
-#     return src
-
-
-
 # Update map figure  
 @app.callback(
 		Output('risk-map', 'figure'),
@@ -613,6 +548,7 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
 		[State('risk-map', 'relayoutData')])
 # def display_map(values, dropdownvalue, value, colorscale, figure):
 def display_map(values, dropdownvalue, value, colorscale, relayoutData):
+    t7 = time.time()
     cm = dict(zip(BINS, colorscale))
 
     # Control of zoom and center for mapbox map
@@ -679,14 +615,14 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
     )
 
     # Define base urls for use in creating geolayers
-    base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
-    # base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
-    # repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
+    # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
+    base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
-    # base_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2/master/jsons/' #v1
-    # base_risk_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2/master/' #v2
-
+    
+    # print ('dropdownvalue = ', dropdownvalue)
+    t6 = time.time()
+    # loop over checklist values
     for i in values:
         # Add base layers to layout if in checklist
         if i in base_layers:
@@ -699,7 +635,8 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
             )
             layout['mapbox']['layers'].append(geo_layer)
         # Add selected confidence contour
-        if 'S_Confidence' in values:
+        # if 'S_Confidence' in values:
+        if i=='S_Confidence':
             base_contourfilename = 'S_contour'
             geo_layer = dict(
                 sourcetype='geojson',
@@ -709,14 +646,22 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                 opacity = 0.5
             )
             layout['mapbox']['layers'].append(geo_layer)
-        # Add risk scoring type if selected in checkbox
-        if 'S_Structure' in values:    
-            for bin in BINS:
+        
+        # Add risk scoring type if selected in checkbox   
+        if i=='S_Structure':
+            print ('dropdownvalue = ', dropdownvalue)
+            # Calculate geolayer if user defined weighting is selected
+            if dropdownvalue=='USER':
+                t0 = time.time()
+                struct_dff = struct_df.copy()
+                t1 = time.time()
+                struct_dff['USER'] = struct_df['R_SCORE']
+                t2 =  time.time()
+                print('copy geodataframe Time: {:.2f} seconds'.format(round(t1 - t0, 2)))
+                print('calc USER Field Time: {:.2f} seconds'.format(round(t2 - t1, 2)))
+                t3 = time.time()
+                for bin in BINS:
                 # Calculate geolayer if user defined weighting is selected
-                if 'USER' in dropdownvalue:
-                    struct_dff = struct_df.copy()
-                    struct_dff['USER'] = struct_df['R_SCORE']
-                    # parse the low and high values for bin
                     low = int(bin.split('-')[0])
                     high = int(bin.split('-')[1]) 
 
@@ -729,28 +674,41 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                             source = bin_json,
                             # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
-                            # fill-outline-color = cm[bin],
+                            # paint={
+                            #     # 'fill-color' : cm[bin],
+                            #     'fill-outline-color' : cm[bin],
+                            #     'fill-opacity' : 0.95
+                            # },
                             color = cm[bin],
-                            # color = '#f4f442',
-                            opacity = 0.8
+                            opacity = 0.95
                     )
-                # Serve prebuilt geolayer if not user defined weighting
-                else:
+                    layout['mapbox']['layers'].append(geo_layer)
+                t4 = time.time()
+                print('create geolayers Time: {:.2f} seconds'.format(round(t4 - t3, 2)))
+            # Serve prebuilt geolayer if not user defined weighting
+            else:
+                for bin in BINS:
                     geo_layer = dict(
                             sourcetype = 'geojson',
                             # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
                             source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
-                            # fill-outline-color = cm[bin],
+                            # paint=dict(
+                            #     fill-color = cm[bin],
+                            #     fill-outline-color = cm[bin],
+                            #     fill-opacity = 0.95
+                            # )
                             color = cm[bin],
-                            # color = '#f4f442',
-                            opacity = 0.8
+                            opacity = 0.95
                     )
 
-
-                layout['mapbox']['layers'].append(geo_layer)
+                    layout['mapbox']['layers'].append(geo_layer)
 
     figure = dict(data=data,layout=layout)
+    t5 = time.time()
+    print('prep map data Time: {:.2f} seconds'.format(round(t6 - t7, 2)))
+    print('render all geolayers Time: {:.2f} seconds'.format(round(t5 - t6, 2)))
+    print('TOTAL map callback Time: {:.2f} seconds'.format(round(t5 - t7, 2)))
     return figure
 
 

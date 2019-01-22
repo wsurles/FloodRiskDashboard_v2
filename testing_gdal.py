@@ -3,42 +3,23 @@
 # 2. using .json and python parsing
 # 3. using .json in a postgres database and sqlalchemy
 
-'''
-~~~~~~~~~~~~~~~~
-~~ IMPORTS ~~
-~~~~~~~~~~~~~~~~
-'''
+#  imports
 import geopandas as gpd
 import time
 import json
-from osgeo import ogr
 
+# try:
+#   from osgeo import ogr
+#   print ('Import of ogr from osgeo worked.  Hurray!\n')
+# except:
+#   print ('Import of ogr from osgeo failed\n\n')
 
+# import fiona
+# print(fiona.supported_drivers)
 
-
-'''
-~~~~~~~~~~~~~~~~
-~~ DATA ~~
-~~~~~~~~~~~~~~~~
-'''
-
-shpfile = r'shp/S_Structure.shp'
-# jsonfile = 'jsons\S_Structure.json'
-
-
-
-'''
-~~~~~~~~~~~~~~~~
-~~ GDAL ~~
-~~~~~~~~~~~~~~~~
-'''
-
-dataSource = ogr.Open(shpfile)
-daLayer = dataSource.GetLayer(0)
-layerDefinition = daLayer.GetLayerDefn()
-
-for i in range(layerDefinition.GetFieldCount()):
-    print (layerDefinition.GetFieldDefn(i).GetName())
+# data
+shpfile = r'Users/daniel/Documents/GitHub/FloodRiskDashboard_v2/shp/S_Structure.shp'
+# jsonfile = r'jsons\S_Structure.json'
 
 
 def generate_from_shp(shpfile):
