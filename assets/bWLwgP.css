@@ -1,6 +1,8 @@
 /* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
 - Plotly.js
+- Header
+- Body
 - Grid
 - Base Styles
 - Typography
@@ -31,6 +33,22 @@
 .Select {
     z-index: 1002;
 }*/
+
+
+
+/* Header
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.header{
+  margin:0px;
+  background-color:#00295b;
+  height:60px;
+  color: #ffffff;
+  padding-left:2% 
+  /* color:#00295b; */
+  /* padding-right:2%; */
+
+}
+
 
 /* Grid
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -127,11 +145,13 @@ are based on 10px sizing. So basically 1.5rem = 15px :) */
 html {
   font-size: 62.5%; }
 body {
+  background-color:#d8d8d8;
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: rgb(50, 50, 50); }
+
 
 
 /* Typography

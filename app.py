@@ -33,12 +33,12 @@ import urllib, os
 
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
 # external_stylesheets = ['https://bootswatch.com/4/cerulean/bootstrap.css']
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/dZVMbK.css'] # update from 2017
 
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)  #, external_stylesheets=external_stylesheets)
 server = app.server
 
 # Set mapbox public access token
@@ -119,15 +119,24 @@ json_file = [
     'S_Confidence.json',        # confidence json
     'S_FHAD_100yr.json',        # 100yr json
     'S_FHAD_500yr.json']        # 500yr json
-below_symbology = [
-    'water',
-    # 'S_500yr',
-    'water',
-    'S_Confidence',
-    'S_100yr']
+# below_symbology = [
+# before_layer = [    
+#     'S_100yr',          # structures json
+#     # 'S_500yr',        # census blocks json
+#     'S_Structure',      # confidence json
+#     'S_500yr',          # 100yr json
+#     'water']            # 500yr json
+before_layer = [    
+    'S_Confidence',          # structures json
+    # 'S_500yr',        # census blocks json
+    'S_Structure',      # confidence json
+    'S_100yr',          # 100yr json
+    'water']            # 500yr json
 
-df_geolayer_info = pd.DataFrame(list(zip(sourcetype,color,opacity,symbology_type,json_file,below_symbology)),
-    columns=['sourcetype', 'color', 'opacity', 'symbology_type', 'json_file', 'below_symbology'])
+# df_geolayer_info = pd.DataFrame(list(zip(sourcetype,color,opacity,symbology_type,json_file,below_symbology)),
+#     columns=['sourcetype', 'color', 'opacity', 'symbology_type', 'json_file', 'below_symbology'])
+df_geolayer_info = pd.DataFrame(list(zip(sourcetype,color,opacity,symbology_type,json_file,before_layer)),
+    columns=['sourcetype', 'color', 'opacity', 'symbology_type', 'json_file', 'before_layer'])
 df_geolayer_info.index = geo_index
 
 # Styles for click-data 
@@ -158,11 +167,23 @@ no_options=[
 customdatalist = [df_structures['R_SCORE'], df_structures['FR_TOT'], df_structures['AEP_TOT'], df_structures['FDP_TOT']]
 
 
+
+
+
+
+
+
 '''
 ~~~~~~~~~~~~~~~~
 ~~ APP LAYOUT ~~
 ~~~~~~~~~~~~~~~~
 '''
+
+
+
+
+
+
 
 app.layout = html.Div(children=[
 
@@ -171,10 +192,10 @@ app.layout = html.Div(children=[
             className='nine columns'),
 
         html.A([
-            html.Img(src='/assets/logo.png',
+            html.Img(src='/assets/logo_white.png',
                 className='three columns',
                 style={
-                    'height': '30px',
+                    # 'height': '90%',
                     'width': '100px',
                     'float': 'right',
                     'position': 'relative',
@@ -183,7 +204,11 @@ app.layout = html.Div(children=[
                 },
             ),
         ], href='http://www.mbakerintl.com/')
-    ], className="row"),
+    ], className="row header",
+    style = {
+        'border-radius': '3px'
+    }
+    ),
 
     # html.Br(),
 
@@ -216,7 +241,9 @@ app.layout = html.Div(children=[
                     marks={step: {'label': str(step)} for step in steps},
                     updatemode = 'drag',
                 ),
-            ], style={'width' : '400px'}), 
+            ], style={
+                'width' : '90%',
+                'padding': '10px'}), 
 
             html.Br(),
             html.Br(),
@@ -229,7 +256,7 @@ app.layout = html.Div(children=[
                             'position':'relative',
                             'margin-top': '10px'}
                         )
-                ], className='three columns'),
+                ], className='four columns'),
                 html.Div([
                     dash_colorscales.DashColorscales(
                         id='colorscale-picker',
@@ -237,21 +264,22 @@ app.layout = html.Div(children=[
                         nSwatches=10,
                         fixSwatches=True,
                     ),
-                ], className='five columns'),
+                ]),#, className='six columns'),
             ], className="row"),
-
-            html.Div([
-                dcc.RangeSlider(
-                min=0,
-                max=100,
-                value=[10, 20, 30, 50]
-                )
-            ], className="row")
-
-        ], className='six columns'),
+        ], className='five columns', 
+        style={
+            'background-color':'white',
+            'margin-right': '0px', 
+            'flex':1,
+            # 'display':'inline-block',
+            # 'width':'100%',
+            'padding':'10px', 
+            'border-radius': '3px'
+            # 'margin-top':'5px'
+        }
+        ),
 
         html.Div([
-            html.Br(),
             html.P(id='dropdown-message'),
             html.Div([
                 dcc.Dropdown(
@@ -261,7 +289,7 @@ app.layout = html.Div(children=[
                     searchable=False,
                     placeholder = 'choose one'
                 ),
-            ], style={'width' : '400px'}), 
+            ], style={'width' : '100%'}), 
 
             html.Br(),
 
@@ -288,8 +316,7 @@ app.layout = html.Div(children=[
                     'vertical-align':'bottom',
                     'position':'relative',
                     'margin-top': '40px'
-                }
-                ),
+                }),
             ], className="row"),
             html.Div([
                 html.Pre(
@@ -307,8 +334,30 @@ app.layout = html.Div(children=[
                 ),
                 html.Br()
             ], className='row')
-        ], className='six columns'),
-    ], className='row'),
+        ], className='seven columns',
+        style={
+            'background-color':'white', 
+            # 'display':'inline-block',
+            'margin-left': '5px',
+            # 'margin-right': '0px',
+            # 'width':'100%',
+            'padding':'10px', 
+            'border-radius': '3px',
+            'flex':1,
+            # 'width': '60.27%',
+            # 'margin-top':'5px'
+        }
+        ),
+    ], className='row',
+    style={
+        'background-color':'#d8d8d8', 
+        # 'padding':'15px', 
+        'margin-top':'5px',
+        'margin-bottom':'5px',
+        'display':'flex',
+        'width':'100%'
+    }
+    ),
 
     # debugging text, comment out after testing
     # html.Pre(id='relayout-message', style=styles['pre']),
@@ -333,7 +382,7 @@ app.layout = html.Div(children=[
                 ),
                 layout = dict(
                     # height = 600,
-                    height = 1200,
+                    # height = 1500,
                     mapbox = dict(
                         layers = [],
                         accesstoken = mapbox_access_token,
@@ -346,10 +395,24 @@ app.layout = html.Div(children=[
                         zoom=12
                     )
                 )
-            )
+            ),
+            style = {
+                'height': '600'
+            }
         )
-    ], className="row"),    
+    ], className="row",
+    # style = {
+    #     'height': '100vh'
+    # }
+    ),    
 ], className='ten columns offset-by-one')
+
+
+
+
+
+
+
 
 
 '''
@@ -357,19 +420,27 @@ app.layout = html.Div(children=[
 ~~ APP CALLBACKS ~~
 ~~~~~~~~~~~~~~~~
 '''
+
+
+
+
+
+
 # streetview image text 
 @app.callback(
     Output('relayout-message', 'children'),
     [Input('risk-map', 'clickData')])
 def display_selected_data(clickData):
     if clickData==None:
-        return str((39,-105))
+        pass
+        # return str((39,-105))
         # return json.dumps(relayoutData, indent=2)
-    else:
-        trace_lat = round(clickData['points'][0]['lat'],6)
-        trace_lon = round(clickData['points'][0]['lon'],6)
-        latlon = str(trace_lat) + ', ' + str(trace_lon)
-        return latlon
+    else: 
+        pass
+        # trace_lat = round(clickData['points'][0]['lat'],6)
+        # trace_lon = round(clickData['points'][0]['lon'],6)
+        # latlon = str(trace_lat) + ', ' + str(trace_lon)
+        # return latlon
 
 # streetview image
 @app.callback(
@@ -603,7 +674,8 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
 
     layout = dict(
         margin = dict(l = 0, r = 0, t = 0, b = 0),
-        uirevision='none',
+        # plot_bgcolor="#191A1A",
+        paper_bgcolor="#020202",
         mapbox = dict(
             layers = [],
             accesstoken = mapbox_access_token,
@@ -630,17 +702,19 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                 sourcetype=df_geolayer_info['sourcetype'].loc[i],
                 source = base_url + df_geolayer_info['json_file'].loc[i],
                 type = df_geolayer_info['symbology_type'].loc[i],
+                # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                 color = df_geolayer_info['color'].loc[i],
                 opacity = df_geolayer_info['opacity'].loc[i]
             )
             layout['mapbox']['layers'].append(geo_layer)
+            # print(layout)
         # Add selected confidence contour
-        # if 'S_Confidence' in values:
         if i=='S_Confidence':
             base_contourfilename = 'S_contour'
             geo_layer = dict(
                 sourcetype='geojson',
                 source = base_url + base_contourfilename + str(value) +  '.json',
+                # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                 type = 'line',
                 color = '#000066',
                 opacity = 0.5
@@ -649,17 +723,17 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
         
         # Add risk scoring type if selected in checkbox   
         if i=='S_Structure':
-            print ('dropdownvalue = ', dropdownvalue)
+            # print ('dropdownvalue = ', dropdownvalue)
             # Calculate geolayer if user defined weighting is selected
             if dropdownvalue=='USER':
-                t0 = time.time()
+                # t0 = time.time()
                 struct_dff = struct_df.copy()
-                t1 = time.time()
+                # t1 = time.time()
                 struct_dff['USER'] = struct_df['R_SCORE']
-                t2 =  time.time()
-                print('copy geodataframe Time: {:.2f} seconds'.format(round(t1 - t0, 2)))
-                print('calc USER Field Time: {:.2f} seconds'.format(round(t2 - t1, 2)))
-                t3 = time.time()
+                # t2 =  time.time()
+                # print('copy geodataframe Time: {:.2f} seconds'.format(round(t1 - t0, 2)))
+                # print('calc USER Field Time: {:.2f} seconds'.format(round(t2 - t1, 2)))
+                # t3 = time.time()
                 for bin in BINS:
                 # Calculate geolayer if user defined weighting is selected
                     low = int(bin.split('-')[0])
@@ -674,41 +748,42 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                             source = bin_json,
                             # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
+                            # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                             # paint={
                             #     # 'fill-color' : cm[bin],
                             #     'fill-outline-color' : cm[bin],
                             #     'fill-opacity' : 0.95
                             # },
                             color = cm[bin],
-                            opacity = 0.95
+                            opacity = 1
                     )
                     layout['mapbox']['layers'].append(geo_layer)
-                t4 = time.time()
-                print('create geolayers Time: {:.2f} seconds'.format(round(t4 - t3, 2)))
+                # t4 = time.time()
+                # print('create geolayers Time: {:.2f} seconds'.format(round(t4 - t3, 2)))
             # Serve prebuilt geolayer if not user defined weighting
             else:
                 for bin in BINS:
                     geo_layer = dict(
                             sourcetype = 'geojson',
-                            # source = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v1/master/FDP_TOT/0-10.geojson',
                             source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
+                            # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                             # paint=dict(
                             #     fill-color = cm[bin],
                             #     fill-outline-color = cm[bin],
                             #     fill-opacity = 0.95
                             # )
                             color = cm[bin],
-                            opacity = 0.95
+                            opacity = 1
                     )
 
                     layout['mapbox']['layers'].append(geo_layer)
 
     figure = dict(data=data,layout=layout)
-    t5 = time.time()
-    print('prep map data Time: {:.2f} seconds'.format(round(t6 - t7, 2)))
-    print('render all geolayers Time: {:.2f} seconds'.format(round(t5 - t6, 2)))
-    print('TOTAL map callback Time: {:.2f} seconds'.format(round(t5 - t7, 2)))
+    # t5 = time.time()
+    # print('prep map data Time: {:.2f} seconds'.format(round(t6 - t7, 2)))
+    # print('render all geolayers Time: {:.2f} seconds'.format(round(t5 - t6, 2)))
+    # print('TOTAL map callback Time: {:.2f} seconds'.format(round(t5 - t7, 2)))
     return figure
 
 
