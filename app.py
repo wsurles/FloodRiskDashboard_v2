@@ -13,6 +13,7 @@
 # example of bootstrap/dash boilderplate  --  https://github.com/ned2/slapdash
 # video tutorial using boilerplate boostrap css  --  https://www.youtube.com/watch?v=f2qUWgq7fb8
 # flexbox tutorial for sizing div items  --  https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+# ordering mapbox layers in dash app  --  https://community.plot.ly/t/solved-show-points-above-choropleth-layer/6552
 
 # -*- coding: utf-8 -*-
 import json
