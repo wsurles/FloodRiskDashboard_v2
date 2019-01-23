@@ -27,6 +27,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_colorscales
 import plotly.graph_objs as go
+import dash_daq as daq
 
 from urllib.parse import quote
 import urllib.request
@@ -213,8 +214,11 @@ app.layout = html.Div(children=[
 
     # html.Br(),
 
+    # Flood hazard risk controls
     html.Div([
         html.Div([
+            html.H6(children='Flood Hazard Risk'), 
+            html.Hr(),           
             dcc.Checklist(
                 id = 'risk-checklist',
                 options=[
@@ -224,7 +228,7 @@ app.layout = html.Div(children=[
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                values=['S_Structure', 'S_100yr'],
+                values=['S_Structure', 'S_100yr', 'S_500yr'],
                 # values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
@@ -281,8 +285,29 @@ app.layout = html.Div(children=[
         }
         ),
 
+        # Structure based risk controls
         html.Div([
-            html.P(id='dropdown-message'),
+            html.H6(children='Structure Based Flood Risk'),
+            html.Hr(), 
+            # daq.BooleanSwitch(
+            #     id='structures-switch',
+            #     # label='Structure Based Flood Risk',
+            #     # labelPosition = 'bottom',
+            #     on=True
+            # ),
+            # html.P()
+
+            dcc.Checklist(
+                id = 'risk-checklist2',
+                options=[
+                    {'label': 'Display Structure Based Flood Risk', 'value': 'S_Structure'},
+                ],
+                values=['S_Structure'],
+            ),
+
+            html.Br(),
+
+            # html.P(id='dropdown-message'),
             html.Div([
                 dcc.Dropdown(
                     id = 'structurebasedrisk_dropdown',
@@ -295,8 +320,55 @@ app.layout = html.Div(children=[
 
             html.Br(),
 
-            dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
-            """),
+            html.Div([
+                html.Div([
+                    daq.NumericInput(
+                        id='FRTOT-numericinput',
+                        min=0,
+                        max=100,
+                        value=20,
+                        label='FR_TOT', 
+                        labelPosition='top',
+                        disabled=True,
+                    ),
+                ], style={'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    daq.NumericInput(
+                        id='AEP-numericinput',
+                        min=0,
+                        max=100,
+                        value=40,
+                        label='AEP_TOT', 
+                        labelPosition='top',
+                        disabled=True,
+                    ),
+                ], style={'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    daq.NumericInput(
+                        id='FDP-numericinput',
+                        min=0,
+                        max=100,
+                        value=40,
+                        label='FDP_TOT', 
+                        labelPosition='top',
+                        disabled=True,
+                    )
+                ], style={'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    html.P(children='User Defined Risk Weighting')
+                ], style={
+                    'display':'inline-block', 
+                    'flex-basis':'55%',
+                    'margin-top':'35px',
+                    'padding-left':'5%'}
+                )
+            ], style={'display':'flex'}),
+            
+
+            # dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
+            # """),
+
+            html.Br(),
 
             # selected structure risk components
             html.Div([
@@ -405,14 +477,10 @@ app.layout = html.Div(children=[
                 )
             ),
             style = {
-                'height': '600'
+                'height': '600',
             }
         )
-    ], className="row",
-    # style = {
-    #     'height': '100vh'
-    # }
-    ),    
+    ], className="row"),    
 ], className='ten columns offset-by-one')
 
 
@@ -484,15 +552,15 @@ def update_image(clickData):
 
 
 # Structure based risk dropdown message
-@app.callback(
-    Output('dropdown-message', 'children'),
-    [Input('risk-checklist', 'values')
-    ])
-def update_dropdown_message(values):
-    if 'S_Structure' in values:
-        return 'Visualize scoring of structure based flood risk'
-    else:
-        return 'Turn on Structure Based Flood Risk to view on map'
+# @app.callback(
+#     Output('dropdown-message', 'children'),
+#     [Input('risk-checklist', 'values')
+#     ])
+# def update_dropdown_message(values):
+#     if 'S_Structure' in values:
+#         return 'Visualize scoring of structure based flood risk'
+#     else:
+#         return 'Turn on Structure Based Flood Risk to view on map'
 
 
 # Update dropdown menu for structure based risk
