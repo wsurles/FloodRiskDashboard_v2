@@ -207,7 +207,7 @@ app.layout = html.Div(children=[
                 },
             ),
         ], href='http://www.mbakerintl.com/')
-    ], className="row header",
+    ], className="header",
     style = {
         'border-radius': '3px'
     }
