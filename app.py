@@ -39,9 +39,9 @@ import urllib, os
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] # from dash's tutorials
 # external_stylesheets = ['https://bootswatch.com/4/cerulean/bootstrap.css']
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/dZVMbK.css'] # update from 2017
+external_stylesheets = ['https://codepen.io/indielyt/pen/PVqKeq.css']
 
-
-app = dash.Dash(__name__)  #, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
 # Set mapbox public access token
