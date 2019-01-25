@@ -156,7 +156,7 @@ all_options=[
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
     {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
-    {'label': 'User Defined Risk Weighting', 'value': 'USER'}
+    {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
 ]
 
 no_options=[
