@@ -768,8 +768,8 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
     )
 
     # Define base urls for use in creating geolayers
-    # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
-    base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
+    base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
+    # base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
     
