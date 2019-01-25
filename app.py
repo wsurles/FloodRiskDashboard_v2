@@ -321,49 +321,49 @@ app.layout = html.Div(children=[
 
             html.Br(),
 
-            html.Div([
-                html.Div([
-                    daq.NumericInput(
-                        id='FRTOT-numericinput',
-                        min=0,
-                        max=100,
-                        value=20,
-                        label='FR_TOT', 
-                        labelPosition='top',
-                        disabled=True,
-                    ),
-                ], style={'display':'inline-block', 'flex-basis':'15%'}),
-                html.Div([
-                    daq.NumericInput(
-                        id='AEP-numericinput',
-                        min=0,
-                        max=100,
-                        value=40,
-                        label='AEP_TOT', 
-                        labelPosition='top',
-                        disabled=True,
-                    ),
-                ], style={'display':'inline-block', 'flex-basis':'15%'}),
-                html.Div([
-                    daq.NumericInput(
-                        id='FDP-numericinput',
-                        min=0,
-                        max=100,
-                        value=40,
-                        label='FDP_TOT', 
-                        labelPosition='top',
-                        disabled=True,
-                    )
-                ], style={'display':'inline-block', 'flex-basis':'15%'}),
-                html.Div([
-                    html.P(children='User Defined Risk Weighting')
-                ], style={
-                    'display':'inline-block', 
-                    'flex-basis':'55%',
-                    'margin-top':'35px',
-                    'padding-left':'5%'}
-                )
-            ], style={'display':'flex'}),
+            # html.Div([
+            #     html.Div([
+            #         daq.NumericInput(
+            #             id='FRTOT-numericinput',
+            #             min=0,
+            #             max=100,
+            #             value=20,
+            #             label='FR_TOT', 
+            #             labelPosition='top',
+            #             disabled=True,
+            #         ),
+            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
+            #     html.Div([
+            #         daq.NumericInput(
+            #             id='AEP-numericinput',
+            #             min=0,
+            #             max=100,
+            #             value=40,
+            #             label='AEP_TOT', 
+            #             labelPosition='top',
+            #             disabled=True,
+            #         ),
+            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
+            #     html.Div([
+            #         daq.NumericInput(
+            #             id='FDP-numericinput',
+            #             min=0,
+            #             max=100,
+            #             value=40,
+            #             label='FDP_TOT', 
+            #             labelPosition='top',
+            #             disabled=True,
+            #         )
+            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
+            #     html.Div([
+            #         html.P(children='User Defined Risk Weighting')
+            #     ], style={
+            #         'display':'inline-block', 
+            #         'flex-basis':'55%',
+            #         'margin-top':'35px',
+            #         'padding-left':'5%'}
+            #     )
+            # ], style={'display':'flex'}),
             
 
             # dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
