@@ -60,13 +60,13 @@ geojson_census = repo_url + '/master/jsons/S_CustomGeometries.json'
 geojson_confidence = repo_url + '/master/jsons/S_Confidence.json'
 geojson_100yr = repo_url + '/master/jsons/S_FHAD_100yr.json'
 geojson_500yr = repo_url + '/master/jsons/S_FHAD_500yr.json'
-# narrative_url = repo_url + '/master/narrative.txt'
+narrative1_url = repo_url + '/master/assets/narrative1.txt'
 structures_shp = ('shp/S_Structure.shp')
 
 # Load Data 
 df_cg = pd.read_csv(custom_geometry_points)
 df_structures = pd.read_csv(structure_points)
-# narrative = (requests.get(narrative_url)).text
+narrative1 = (requests.get(narrative1_url)).text
 struct_df = gpd.read_file(structures_shp)
 
 # Define confidence interval steps for slider
@@ -84,6 +84,7 @@ DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159,
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
 mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
 # mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+# mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
 
 # Define symbology for json layers
 geo_index = [
@@ -105,7 +106,7 @@ color = [
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    1,    # structures opacity
+    0.2,    # structures opacity
     # 0.4,  # census blocks opacity
     1,  # confidence opacity
     0.5,  # 100yr opacity
@@ -156,7 +157,7 @@ all_options=[
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
     {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
-    {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
+    {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': False}
 ]
 
 no_options=[
@@ -213,6 +214,62 @@ app.layout = html.Div(children=[
     }
     ),
 
+    html.Div([
+        html.H6(
+            narrative1
+        )
+    ], className="row", style={
+    'background-color':'white',
+    # 'margin-right': '0px', 
+    'padding':'5px 5px 5px 5px', 
+    'border-radius': '3px',
+    # 'margin-top':'5px',
+    # 'column-count': '3',
+    }),
+
+    html.Div([
+        dcc.Graph(
+            id='risk-map',
+            figure=dict(
+                data = dict(
+                    lat=df_structures['lat'],
+                    lon=df_structures['lon'],
+                    # hoverinfo = 'text', # for adding hover info to buildings
+                    hoverinfo = 'none', # use this for testing, turns hover labels off
+                    customdata=customdatalist,
+                    text=df_structures['R_SCORE'],
+                    type='scattermapbox',
+                    marker=dict(
+                        size=1
+                    ),
+                    opacity = 0,
+                ),
+                layout = dict(
+                    # height = 600,
+                    # height = 1500,
+                    mapbox = dict(
+                        layers = [],
+                        accesstoken = mapbox_access_token,
+                        style = mapboxstyle,
+                        center=dict(
+                            lat=39.7093,
+                            lon=-105.05555           
+                        ),
+                        pitch=0,
+                        zoom=14
+                    )
+                )
+            ),
+            style = {
+                'height': '500',
+                # 'border-radius' : '3px'
+            }
+        )
+    ], className="row",
+    style = { 
+        'margin-top' : '5px',
+        'border-radius' : '3px'
+    }), 
     # html.Br(),
 
     # Flood hazard risk controls
@@ -223,7 +280,7 @@ app.layout = html.Div(children=[
             dcc.Checklist(
                 id = 'risk-checklist',
                 options=[
-                    {'label': 'Display Structure Based Flood Risk', 'value': 'S_Structure'},
+                    # {'label': 'Display Structure Based Flood Risk', 'value': 'S_Structure'},
                     {'label': 'Display Probabilistic Floodplain Modeling', 'value': 'S_Confidence'},
                     # {'label': 'Display Sociovulnerability to Flood Hazards', 'value': 'S_CustomGeometries'},
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
@@ -369,7 +426,8 @@ app.layout = html.Div(children=[
             # dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
             # """),
 
-            html.Br(),
+            # html.Br(),
+            html.Pre(id='relayout-message', style=styles['pre']),
 
             # selected structure risk components
             html.Div([
@@ -444,44 +502,44 @@ app.layout = html.Div(children=[
     # html.Pre(id='relayout-message', style=styles['pre']),
     # html.Img(src=' ', id='image'),
     
-    html.Div([
-        dcc.Graph(
-            id='risk-map',
-            figure=dict(
-                data = dict(
-                    lat=df_structures['lat'],
-                    lon=df_structures['lon'],
-                    # hoverinfo = 'text', # for adding hover info to buildings
-                    hoverinfo = 'none', # use this for testing, turns hover labels off
-                    customdata=customdatalist,
-                    text=df_structures['R_SCORE'],
-                    type='scattermapbox',
-                    marker=dict(
-                        size=1
-                    ),
-                    opacity = 0,
-                ),
-                layout = dict(
-                    # height = 600,
-                    # height = 1500,
-                    mapbox = dict(
-                        layers = [],
-                        accesstoken = mapbox_access_token,
-                        style = mapboxstyle,
-                        center=dict(
-                            lat=39.7093,
-                            lon=-105.05555           
-                        ),
-                        pitch=0,
-                        zoom=12
-                    )
-                )
-            ),
-            style = {
-                'height': '600',
-            }
-        )
-    ], className="row"),    
+    # html.Div([
+    #     dcc.Graph(
+    #         id='risk-map',
+    #         figure=dict(
+    #             data = dict(
+    #                 lat=df_structures['lat'],
+    #                 lon=df_structures['lon'],
+    #                 # hoverinfo = 'text', # for adding hover info to buildings
+    #                 hoverinfo = 'none', # use this for testing, turns hover labels off
+    #                 customdata=customdatalist,
+    #                 text=df_structures['R_SCORE'],
+    #                 type='scattermapbox',
+    #                 marker=dict(
+    #                     size=1
+    #                 ),
+    #                 opacity = 0,
+    #             ),
+    #             layout = dict(
+    #                 # height = 600,
+    #                 # height = 1500,
+    #                 mapbox = dict(
+    #                     layers = [],
+    #                     accesstoken = mapbox_access_token,
+    #                     style = mapboxstyle,
+    #                     center=dict(
+    #                         lat=39.7093,
+    #                         lon=-105.05555           
+    #                     ),
+    #                     pitch=0,
+    #                     zoom=12
+    #                 )
+    #             )
+    #         ),
+    #         style = {
+    #             'height': '600',
+    #         }
+    #     )
+    # ], className="row"),    
 ], className='ten columns offset-by-one')
 
 
@@ -503,21 +561,21 @@ app.layout = html.Div(children=[
 
 
 
-# # streetview image text 
-# @app.callback(
-#     Output('relayout-message', 'children'),
-#     [Input('risk-map', 'clickData')])
-# def display_selected_data(clickData):
-#     if clickData==None:
-#         pass
-#         # return str((39,-105))
-#         # return json.dumps(relayoutData, indent=2)
-#     else: 
-#         pass
-#         # trace_lat = round(clickData['points'][0]['lat'],6)
-#         # trace_lon = round(clickData['points'][0]['lon'],6)
-#         # latlon = str(trace_lat) + ', ' + str(trace_lon)
-#         # return latlon
+# streetview image text 
+@app.callback(
+    Output('relayout-message', 'children'),
+    [Input('risk-map', 'clickData')])
+def display_selected_data(clickData):
+    if clickData==None:
+        pass
+        # return str((39,-105))
+        # return json.dumps(relayoutData, indent=2)
+    else: 
+        # pass
+        trace_lat = round(clickData['points'][0]['lat'],6)
+        trace_lon = round(clickData['points'][0]['lon'],6)
+        latlon = str(trace_lat) + ', ' + str(trace_lon)
+        return latlon
 
 # streetview image
 @app.callback(
@@ -694,14 +752,15 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
 @app.callback(
 		Output('risk-map', 'figure'),
 		[Input('risk-checklist', 'values'),
+        Input('risk-checklist2', 'values'),
         Input('structurebasedrisk_dropdown','value'),
         Input('confidence-slider', 'value'),
         Input('colorscale-picker', 'colorscale')],
 		[State('risk-map', 'relayoutData')])
 # def display_map(values, dropdownvalue, value, colorscale, figure):
-def display_map(values, dropdownvalue, value, colorscale, relayoutData):
-    t7 = time.time()
+def display_map(values, checklist2values, dropdownvalue, value, colorscale, relayoutData):
     cm = dict(zip(BINS, colorscale))
+    struct_dff = struct_df.copy()
 
     # Control of zoom and center for mapbox map
     try: # hold existing map extent constant during user interaction
@@ -709,23 +768,29 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
         lonInitial = (relayoutData['mapbox.center']['lon'])
         zoom = (relayoutData['mapbox.zoom'])
     except: # incase of using checklist before changing map extent
-        latInitial=39.715
-        lonInitial=-105.065
-        zoom=12
+        # latInitial=39.715
+        # lonInitial=-105.065
+        # zoom=12
+        latInitial=39.718741
+        lonInitial=-105.038733
+        zoom=15
     
-    data = dict(
-        lat=df_structures['lat'],
-        lon=df_structures['lon'],
-        customdata=customdatalist,
-        hoverinfo = 'text', # for adding hover info to buildings
-        # hoverinfo = 'none', # use this for testing, turns hover labels off
-        text=df_structures['R_SCORE'],
-        type='scattermapbox',
-        marker=dict(
-            size=10
-        ),
-        opacity = 0,
-    ),
+    # data = dict(
+    #     # lat=df_structures['lat'],
+    #     # lon=df_structures['lon'],
+    #     lat=struct_dff['lat'],
+    #     lon=struct_dff['lon'],
+    #     customdata=customdatalist,
+    #     hoverinfo = 'text', # for adding hover info to buildings
+    #     # hoverinfo = 'none', # use this for testing, turns hover labels off
+    #     # text=df_structures[dropdownvalue],
+    #     text=struct_dff[[dropdownvalue],
+    #     type='scattermapbox',
+    #     marker=dict(
+    #         size=10
+    #     ),
+    #     opacity = 0,
+    # ),
 
     # define legend, title, and location
     legendtitle = '<b>' + dropdownvalue + '</b>'
@@ -773,9 +838,7 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
     
-    # print ('dropdownvalue = ', dropdownvalue)
-    t6 = time.time()
-    # loop over checklist values
+    # add flood hazard risk layers to map if selected
     for i in values:
         # Add base layers to layout if in checklist
         if i in base_layers:
@@ -801,20 +864,15 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                 opacity = 0.5
             )
             layout['mapbox']['layers'].append(geo_layer)
-        
+
+    # Add structure based risk to map if selected     
+    for i in checklist2values:     
         # Add risk scoring type if selected in checkbox   
         if i=='S_Structure':
-            # print ('dropdownvalue = ', dropdownvalue)
             # Calculate geolayer if user defined weighting is selected
             if dropdownvalue=='USER':
-                # t0 = time.time()
                 struct_dff = struct_df.copy()
-                # t1 = time.time()
                 struct_dff['USER'] = struct_df['R_SCORE']
-                # t2 =  time.time()
-                # print('copy geodataframe Time: {:.2f} seconds'.format(round(t1 - t0, 2)))
-                # print('calc USER Field Time: {:.2f} seconds'.format(round(t2 - t1, 2)))
-                # t3 = time.time()
                 for bin in BINS:
                 # Calculate geolayer if user defined weighting is selected
                     low = int(bin.split('-')[0])
@@ -827,7 +885,6 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                     geo_layer = dict(
                             sourcetype = 'geojson',
                             source = bin_json,
-                            # source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
                             type ='fill',
                             # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                             # paint={
@@ -839,8 +896,7 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                             opacity = 1
                     )
                     layout['mapbox']['layers'].append(geo_layer)
-                # t4 = time.time()
-                # print('create geolayers Time: {:.2f} seconds'.format(round(t4 - t3, 2)))
+
             # Serve prebuilt geolayer if not user defined weighting
             else:
                 for bin in BINS:
@@ -859,6 +915,22 @@ def display_map(values, dropdownvalue, value, colorscale, relayoutData):
                     )
 
                     layout['mapbox']['layers'].append(geo_layer)
+
+    data = dict(
+        # lat=df_structures['lat'],
+        # lon=df_structures['lon'],
+        lat=struct_dff['lat'],
+        lon=struct_dff['lon'],
+        customdata=customdatalist,
+        hoverinfo = 'text', # for adding hover info to buildings
+        # hoverinfo = 'none', # use this for testing, turns hover labels off
+        text=struct_dff[dropdownvalue],
+        type='scattermapbox',
+        marker=dict(
+            size=10
+        ),
+        opacity = 0,
+    ),
 
     figure = dict(data=data,layout=layout)
     # t5 = time.time()
