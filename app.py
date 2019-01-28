@@ -14,6 +14,7 @@
 # video tutorial using boilerplate boostrap css  --  https://www.youtube.com/watch?v=f2qUWgq7fb8
 # flexbox tutorial for sizing div items  --  https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 # ordering mapbox layers in dash app  --  https://community.plot.ly/t/solved-show-points-above-choropleth-layer/6552
+# hiding divs with callbacks  --  https://stackoverflow.com/questions/50852743/plotly-figure-hide-and-display
 
 # -*- coding: utf-8 -*-
 import json
@@ -43,6 +44,8 @@ external_stylesheets = ['https://codepen.io/indielyt/pen/PVqKeq.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
+
+app.config['suppress_callback_exceptions']=True
 
 # Set mapbox public access token
 mapbox_access_token = 'pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A'
@@ -215,13 +218,14 @@ app.layout = html.Div(children=[
     ),
 
     html.Div([
-        html.H6(
+        html.P(
             narrative1
         )
     ], className="row", style={
     'background-color':'white',
     # 'margin-right': '0px', 
-    'padding':'5px 5px 5px 5px', 
+    # 'padding':'5px 5px 5px 5px', 
+    'padding':'5px', 
     'border-radius': '3px',
     # 'margin-top':'5px',
     # 'column-count': '3',
@@ -275,7 +279,7 @@ app.layout = html.Div(children=[
     # Flood hazard risk controls
     html.Div([
         html.Div([
-            html.H6(children='Flood Hazard Risk'), 
+            html.H5(children='Flood Hazard Risk'), 
             html.Hr(),           
             dcc.Checklist(
                 id = 'risk-checklist',
@@ -310,8 +314,11 @@ app.layout = html.Div(children=[
 
             html.Br(),
             html.Br(),
+            # html.Hr(),
 
             html.Div([
+                html.Hr(),
+                html.H6(children="Map Controls"),
                 html.Div([
                     html.P(children='Select Color Map',
                         style={
@@ -337,15 +344,16 @@ app.layout = html.Div(children=[
             'flex-basis': '40%',
             # 'display':'inline-block',
             # 'width':'100%',
+            # 'position':'relative',
             'padding':'10px', 
-            'border-radius': '3px'
-            # 'margin-top':'5px'
+            'border-radius': '3px',
+            # 'margin-top':'25px'
         }
         ),
 
         # Structure based risk controls
         html.Div([
-            html.H6(children='Structure Based Flood Risk'),
+            html.H5(children='Structure Based Flood Risk'),
             html.Hr(), 
             # daq.BooleanSwitch(
             #     id='structures-switch',
@@ -370,64 +378,74 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id = 'structurebasedrisk_dropdown',
                     options = all_options,
-                    value="R_SCORE",
-                    searchable=False,
+                    value = "R_SCORE",
+                    searchable = False,
                     placeholder = 'choose one'
                 ),
             ], style={'width' : '100%'}), 
 
             html.Br(),
 
-            # html.Div([
-            #     html.Div([
-            #         daq.NumericInput(
-            #             id='FRTOT-numericinput',
-            #             min=0,
-            #             max=100,
-            #             value=20,
-            #             label='FR_TOT', 
-            #             labelPosition='top',
-            #             disabled=True,
-            #         ),
-            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
-            #     html.Div([
-            #         daq.NumericInput(
-            #             id='AEP-numericinput',
-            #             min=0,
-            #             max=100,
-            #             value=40,
-            #             label='AEP_TOT', 
-            #             labelPosition='top',
-            #             disabled=True,
-            #         ),
-            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
-            #     html.Div([
-            #         daq.NumericInput(
-            #             id='FDP-numericinput',
-            #             min=0,
-            #             max=100,
-            #             value=40,
-            #             label='FDP_TOT', 
-            #             labelPosition='top',
-            #             disabled=True,
-            #         )
-            #     ], style={'display':'inline-block', 'flex-basis':'15%'}),
-            #     html.Div([
-            #         html.P(children='User Defined Risk Weighting')
-            #     ], style={
-            #         'display':'inline-block', 
-            #         'flex-basis':'55%',
-            #         'margin-top':'35px',
-            #         'padding-left':'5%'}
-            #     )
-            # ], style={'display':'flex'}),
-            
+            html.Hr(),
+            # html.H6(children='User Defined Risk Weighting'),
 
-            # dcc.Markdown("""Structure Based Risk Score: *Click on structures in the map*
-            # """),
+            html.Div([
+                # html.Div([
+                #     html.H6(children='User Defined Risk Weighting')
+                # ], className='row', style={'display':'block'}
+                # ),
+                # html.H6(children='User Defined Risk Weighting'),
+                html.Div([
+                    html.H6(children='FR_TOT'),   
+                    dcc.Input(
+                        id = 'FRTOT-numericinput',
+                        type = 'number',
+                        size = '10',
+                        placeholder = '20',
+                        min = 0,
+                        max = 100,
+                        step = 5
+                    ),
+                ], style = {'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    html.H6(children='AEP_TOT'),  
+                    dcc.Input(
+                        id = 'AEPTOT-numericinput',
+                        type = 'number',
+                        size = '10',
+                        placeholder = '40',
+                        min = 0,
+                        max = 100,
+                        step = 5
+                    ),
+                ], style = {'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    html.H6(children='FDP_TOT'),  
+                    dcc.Input(
+                        id = 'FDPTOT-numericinput',
+                        type = 'number',
+                        size = '10',
+                        placeholder = '40',
+                        min = 0,
+                        max = 100,
+                        step = 5
+                    ),
+                ], style = {'display':'inline-block', 'flex-basis':'15%'}),
+                html.Div([
+                    html.H6(children='Weights must sum to 100 %'), 
+                    html.Button('Submit User Defined Weights', id='button')
+                ], style={
+                    'display':'inline-block', 
+                    'flex-basis':'55%',
+                    # 'margin-top':'0px',
+                    'padding-left':'5%'}
+                )
+            ], style={'display':'flex', 'margin-bottom':'15px'}),
 
-            # html.Br(),
-            html.Pre(id='relayout-message', style=styles['pre']),
+            html.Hr(), 
+
+  
+            # html.Pre(id='relayout-message', style=styles['pre']),
 
             # selected structure risk components
             html.Div([
@@ -793,7 +811,12 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
     # ),
 
     # define legend, title, and location
-    legendtitle = '<b>' + dropdownvalue + '</b>'
+    title_dict = {'R_SCORE': 'Total Risk Score (R_SCORE)', 
+        'FR_TOT': 'Flood Risk (FR_TOT)',
+        'AEP_TOT': 'Annual Exceedence Probability (AEP_TOT)', 
+        'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
+        'USER': 'User Defined Weighting'}
+    legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
     annotations = [dict(
         showarrow = False,
         align = 'left',
@@ -814,7 +837,8 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
 				ay = 0,
 				arrowwidth = 5,
 				arrowhead = 0,
-				bgcolor = '#EFEFEE'
+				# bgcolor = '#EFEFEE'
+                bgcolor = '#ffffff'
 			)
 		)
 
