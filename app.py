@@ -160,14 +160,14 @@ all_options=[
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
     {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
-    {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': False}
+    {'label': 'User Defined Risk Weighting', 'value': 'USER'}
 ]
 
 no_options=[
-    {'label': 'Total Risk Score', 'value': 'R_SCORE', 'disabled': True},
-    {'label': 'Flood Risk Score', 'value': 'FR_TOT', 'disabled': True},
-    {'label': 'Annual Exceedance Probability', 'value': 'AEP_TOT', 'disabled': True},
-    {'label': 'Flood Damage Potential', 'value': 'FDP_TOT', 'disabled': True},
+    {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE', 'disabled': True},
+    {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT', 'disabled': True},
+    {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT', 'disabled': True},
+    {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT', 'disabled': True},
     {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
 ]
 
@@ -318,15 +318,16 @@ app.layout = html.Div(children=[
 
             html.Div([
                 html.Hr(),
-                html.H6(children="Map Controls"),
+                html.H5(children="Map Controls"),
                 html.Div([
-                    html.P(children='Select Color Map',
+                    html.P(children='Select Structures Color Map',
                         style={
                             'float': 'right', 
                             'position':'relative',
-                            'margin-top': '10px'}
+                            'margin-top': '10px',
+                            'font-size': '12px'}
                         )
-                ], className='four columns'),
+                ], className='five columns'),
                 html.Div([
                     dash_colorscales.DashColorscales(
                         id='colorscale-picker',
@@ -380,7 +381,7 @@ app.layout = html.Div(children=[
                     options = all_options,
                     value = "R_SCORE",
                     searchable = False,
-                    placeholder = 'choose one'
+                    # placeholder = 'choose one'
                 ),
             ], style={'width' : '100%'}), 
 
@@ -401,7 +402,7 @@ app.layout = html.Div(children=[
                         id = 'FRTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '20',
+                        placeholder = '0',
                         min = 0,
                         max = 100,
                         step = 5
@@ -413,7 +414,7 @@ app.layout = html.Div(children=[
                         id = 'AEPTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '40',
+                        placeholder = '0',
                         min = 0,
                         max = 100,
                         step = 5
@@ -425,14 +426,14 @@ app.layout = html.Div(children=[
                         id = 'FDPTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '40',
+                        placeholder = '0',
                         min = 0,
                         max = 100,
                         step = 5
                     ),
                 ], style = {'display':'inline-block', 'flex-basis':'15%'}),
                 html.Div([
-                    html.H6(children='Weights must sum to 100 %'), 
+                    html.H6(children='', id='user-message'), 
                     html.Button('Submit User Defined Weights', id='button')
                 ], style={
                     'display':'inline-block', 
@@ -579,6 +580,30 @@ app.layout = html.Div(children=[
 
 
 
+# User defined weights message
+@app.callback(
+    Output('user-message', 'children'),
+    [Input('FRTOT-numericinput', 'value'),
+    Input('AEPTOT-numericinput', 'value'),
+    Input('FDPTOT-numericinput', 'value'),
+    Input('structurebasedrisk_dropdown', 'value')])
+def sum_user_weights(FRTOTval, AEPTOTval, FDPTOTval, dropdownvalue):
+    if dropdownvalue == 'USER':
+        if FRTOTval==None:# or AEPTOTval==None or FDPTOTval==None:
+            message = f"Provide three weights"
+        else:
+            user_sum = FRTOTval + AEPTOTval + FDPTOTval
+            if user_sum != 100:
+                message = f"Sum = {user_sum}%. Must equal 100 %"
+            else:
+                message = f"Click submit to update map."    
+    else: 
+        message = f"Select User Defined Weights from Dropdown"
+        
+    return message
+
+
+
 # streetview image text 
 @app.callback(
     Output('relayout-message', 'children'),
@@ -643,12 +668,17 @@ def update_image(clickData):
 # Update dropdown menu for structure based risk
 @app.callback(
     Output('structurebasedrisk_dropdown', 'options'),
-    [Input('risk-checklist', 'values')])
+    # Output('structurebasedrisk_dropdown', 'disabled'),
+    # Output('structurebasedrisk_dropdown', 'placeholder'),
+    [Input('risk-checklist2', 'values')])
 def update_risk_dropdown(values):
     if 'S_Structure' not in values:
         return no_options
+        # return f"disabled"
     else:
         return all_options
+        # return False
+        # return f"enabled"
 
 
 # Update text below slider - which  confidence level is displayed
