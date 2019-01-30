@@ -195,7 +195,7 @@ customdatalist = [df_structures['R_SCORE'], df_structures['FR_TOT'], df_structur
 app.layout = html.Div(children=[
 
     html.Div([
-        html.H4(children='The Future of Flood Risk Understanding',
+        html.H4(children='Interactive Flood Hazard and Risk Viewer',
             className='nine columns'),
 
         html.A([
@@ -279,7 +279,7 @@ app.layout = html.Div(children=[
     # Flood hazard risk controls
     html.Div([
         html.Div([
-            html.H5(children='Flood Hazard Risk'), 
+            html.H5(children='Area Based Flood Hazards'), 
             html.Hr(),           
             dcc.Checklist(
                 id = 'risk-checklist',
@@ -290,15 +290,18 @@ app.layout = html.Div(children=[
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                values=['S_Structure', 'S_100yr', 'S_500yr'],
+                values=['S_100yr', 'S_500yr'],
                 # values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
 
             html.Br(),
-            html.P(id='slider-message'),
+            # html.P(id='slider-message'),
 
-            html.Div([
+            html.Div(
+                id='slider-container',
+                children=[
+                html.P(id='slider-message'),
                 dcc.Slider(
                     id='confidence-slider',
                     min=min(steps),
@@ -307,13 +310,13 @@ app.layout = html.Div(children=[
                     value=0,
                     marks={step: {'label': str(step)} for step in steps},
                     updatemode = 'drag',
-                ),
+                )
             ], style={
                 'width' : '90%',
                 'padding': '10px'}), 
 
             html.Br(),
-            html.Br(),
+            # html.Br(),
             # html.Hr(),
 
             html.Div([
@@ -374,7 +377,6 @@ app.layout = html.Div(children=[
 
             html.Br(),
 
-            # html.P(id='dropdown-message'),
             html.Div([
                 dcc.Dropdown(
                     id = 'structurebasedrisk_dropdown',
@@ -387,15 +389,12 @@ app.layout = html.Div(children=[
 
             html.Br(),
 
-            html.Hr(),
-            # html.H6(children='User Defined Risk Weighting'),
+            # html.Hr(),
 
-            html.Div([
-                # html.Div([
-                #     html.H6(children='User Defined Risk Weighting')
-                # ], className='row', style={'display':'block'}
-                # ),
-                # html.H6(children='User Defined Risk Weighting'),
+            html.Div(
+                id='userweights-container',
+                children=[
+                html.Hr(),
                 html.Div([
                     html.H6(children='FR_TOT'),   
                     dcc.Input(
@@ -580,6 +579,18 @@ app.layout = html.Div(children=[
 
 
 
+# Update user defined weights div (show/hide)
+@app.callback(
+    Output('userweights-container', 'style'),
+    [Input('structurebasedrisk_dropdown', 'value')])
+def hide_slider(value):
+    if value=='USER':
+        return {'display': 'flex', 'margin-bottom':'15px'} 
+    else:
+        return {'display': 'none'} 
+
+
+
 # User defined weights message
 @app.callback(
     Output('user-message', 'children'),
@@ -681,6 +692,23 @@ def update_risk_dropdown(values):
         # return f"enabled"
 
 
+
+
+
+# Update probabilistic slider div (show/hide)
+@app.callback(
+    Output('slider-container', 'style'),
+    [Input('risk-checklist', 'values')])
+def hide_slider(values):
+    if 'S_Confidence' in values:
+        return {'display': 'block', 'width' : '90%', 'padding': '10px'} 
+    else:
+        return {'display': 'none'} 
+
+
+
+
+
 # Update text below slider - which  confidence level is displayed
 @app.callback(
     Output('slider-message', 'children'),
@@ -701,7 +729,7 @@ def display_click_data(clickData):
     if clickData==None:
         click_message = f"Total Risk Score: " + '\n' + \
             f"Flood Risk: " + '\n' +  \
-            f"Annual Exceedence Probability: " + '\n' + \
+            f"100-Year Exceedence Probability: " + '\n' + \
             f"Flood Damage Potential: "
         return click_message
     else:
