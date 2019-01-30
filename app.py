@@ -91,37 +91,37 @@ mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
 
 # Define symbology for json layers
 geo_index = [
-    'S_Structure',         # structures index
+    # 'S_Structure',         # structures index
     # 'S_CustomGeometries',  # census blocks index
     'S_Confidence',        # confidence index
     'S_100yr',             # 100yr index
     'S_500yr']             # 500yr index
 sourcetype = [
-    'geojson', # structures sourcetype
+    # 'geojson', # structures sourcetype
     # 'geojson', # census sourcetype
     'geojson', # confidence sourcetype
     'geojson', # 100yr sourcetype
     'geojson'] # 500yr sourcetype
 color = [
-    '#D3D3D3', # structures color
+    # '#D3D3D3', # structures color
     # '#484848', # census blocks color
     '#80b3ff', # confidence color
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    0.2,    # structures opacity
+    # 0.2,    # structures opacity
     # 0.4,  # census blocks opacity
     1,  # confidence opacity
     0.5,  # 100yr opacity
     0.7]  # 500yr opacity
 symbology_type = [
-    'fill',  # structures symbology
+    # 'fill',  # structures symbology
     # 'line',  # census block symbology
     'line',  # confidence symbology
     'fill',  # 100yr symbology
     'fill']  # 500yr symbology
 json_file = [
-    'S_Structure.json',         # structures json
+    # 'S_Structure.json',         # structures json
     # 'S_CustomGeometries.json',  # census blocks json
     'S_Confidence.json',        # confidence json
     'S_FHAD_100yr.json',        # 100yr json
@@ -134,7 +134,7 @@ json_file = [
 #     'S_500yr',          # 100yr json
 #     'water']            # 500yr json
 before_layer = [    
-    'S_Confidence',          # structures json
+    # 'S_Confidence',          # structures json
     # 'S_500yr',        # census blocks json
     'S_Structure',      # confidence json
     'S_100yr',          # 100yr json
@@ -158,7 +158,7 @@ styles = {
 all_options=[
     {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE'},
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
-    {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
+    {'label': '100-Year Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
     {'label': 'User Defined Risk Weighting', 'value': 'USER'}
 ]
@@ -166,7 +166,7 @@ all_options=[
 no_options=[
     {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE', 'disabled': True},
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT', 'disabled': True},
-    {'label': 'Annual Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT', 'disabled': True},
+    {'label': '100-Year Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT', 'disabled': True},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT', 'disabled': True},
     {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
 ]
@@ -290,7 +290,7 @@ app.layout = html.Div(children=[
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                values=['S_100yr', 'S_500yr'],
+                values=['S_Structure', 'S_100yr', 'S_500yr'],
                 # values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
@@ -325,12 +325,13 @@ app.layout = html.Div(children=[
                 html.Div([
                     html.P(children='Select Structures Color Map',
                         style={
-                            'float': 'right', 
-                            'position':'relative',
-                            'margin-top': '10px',
                             'font-size': '12px'}
                         )
-                ], className='five columns'),
+                ], className='five columns', style={
+                    # 'display': 'inline-block',
+                    # 'float': 'right',
+                    'margin-top': '10px',
+                }),
                 html.Div([
                     dash_colorscales.DashColorscales(
                         id='colorscale-picker',
@@ -338,8 +339,12 @@ app.layout = html.Div(children=[
                         nSwatches=10,
                         fixSwatches=True,
                     ),
-                ]),#, className='six columns'),
-            ], className="row"),
+                ]),#, className='seven columns', style={
+                    # 'display': 'inline-block'
+                # }),#, className='six columns'),
+            ], className="row", style={
+                # 'display': 'inline-block'
+            }),
         ], className='five columns', 
         style={
             'background-color':'white',
@@ -579,6 +584,9 @@ app.layout = html.Div(children=[
 
 
 
+
+
+
 # Update user defined weights div (show/hide)
 @app.callback(
     Output('userweights-container', 'style'),
@@ -609,7 +617,7 @@ def sum_user_weights(FRTOTval, AEPTOTval, FDPTOTval, dropdownvalue):
             else:
                 message = f"Click submit to update map."    
     else: 
-        message = f"Select User Defined Weights from Dropdown"
+        message = " "
         
     return message
 
@@ -709,14 +717,14 @@ def hide_slider(values):
 
 
 
-# Update text below slider - which  confidence level is displayed
+# Update slider message - which  confidence level is displayed
 @app.callback(
     Output('slider-message', 'children'),
     [Input('confidence-slider', 'value'),
     Input('risk-checklist', 'values')])
 def update_slider_message(value, values):
     if 'S_Confidence' in values:
-        return 'Displaying the {} percent confidence level for the 100yr floodplain boundary'.format(value)
+        return 'Displaying the {} percent confidence boundary for the 100-year floodplain boundary'.format(value)
     else:
         return """Turn on Probabilistic Floodplain Modeling to view on map"""
 
@@ -871,10 +879,11 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
     # define legend, title, and location
     title_dict = {'R_SCORE': 'Total Risk Score (R_SCORE)', 
         'FR_TOT': 'Flood Risk (FR_TOT)',
-        'AEP_TOT': 'Annual Exceedence Probability (AEP_TOT)', 
+        'AEP_TOT': '100-Year Exceedence Probability (AEP_TOT)', 
         'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
         'USER': 'User Defined Weighting'}
-    legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
+    # legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
+    legendtitle = '<b>' + 'Structure Based Flood Risk' + '</b>'
     annotations = [dict(
         showarrow = False,
         align = 'left',
@@ -915,12 +924,12 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
     )
 
     # Define base urls for use in creating geolayers
-    base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
-    # base_layers = ['S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v2
+    # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
+    base_layers = ['S_Confidence', 'S_100yr', 'S_500yr'] #v2
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
     
-    # add flood hazard risk layers to map if selected
+    # Add flood hazard risk layers to map if selected
     for i in values:
         # Add base layers to layout if in checklist
         if i in base_layers:
@@ -953,31 +962,36 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
         if i=='S_Structure':
             # Calculate geolayer if user defined weighting is selected
             if dropdownvalue=='USER':
-                struct_dff = struct_df.copy()
-                struct_dff['USER'] = struct_df['R_SCORE']
-                for bin in BINS:
-                # Calculate geolayer if user defined weighting is selected
-                    low = int(bin.split('-')[0])
-                    high = int(bin.split('-')[1]) 
+                pass
 
-                    # query the structure dataframe for values in each bin range by user's dropdown value
-                    bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
-                    bin_json = json.loads(bin_data.to_json())
+                # need to create 'USER' field in struct_dff and calc to that field (for annotations).
 
-                    geo_layer = dict(
-                            sourcetype = 'geojson',
-                            source = bin_json,
-                            type ='fill',
-                            # beforeLayer = df_geolayer_info['before_layer'].loc[i],
-                            # paint={
-                            #     # 'fill-color' : cm[bin],
-                            #     'fill-outline-color' : cm[bin],
-                            #     'fill-opacity' : 0.95
-                            # },
-                            color = cm[bin],
-                            opacity = 1
-                    )
-                    layout['mapbox']['layers'].append(geo_layer)
+
+                # struct_dff = struct_df.copy()
+                # struct_dff['USER'] = struct_df['R_SCORE']
+                # for bin in BINS:
+                # # Calculate geolayer if user defined weighting is selected
+                #     low = int(bin.split('-')[0])
+                #     high = int(bin.split('-')[1]) 
+
+                #     # query the structure dataframe for values in each bin range by user's dropdown value
+                #     bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
+                #     bin_json = json.loads(bin_data.to_json())
+
+                #     geo_layer = dict(
+                #             sourcetype = 'geojson',
+                #             source = bin_json,
+                #             type ='fill',
+                #             # beforeLayer = df_geolayer_info['before_layer'].loc[i],
+                #             # paint={
+                #             #     # 'fill-color' : cm[bin],
+                #             #     'fill-outline-color' : cm[bin],
+                #             #     'fill-opacity' : 0.95
+                #             # },
+                #             color = cm[bin],
+                #             opacity = 1
+                #     )
+                #     layout['mapbox']['layers'].append(geo_layer)
 
             # Serve prebuilt geolayer if not user defined weighting
             else:
