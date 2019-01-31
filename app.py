@@ -1007,10 +1007,9 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, colo
                         sourcetype = 'geojson',
                         source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
                         type ='fill',
-                        # outline = cm2[bin],
-                        fill_outline_color = cm2[bin],
+                        fill = {'outlinecolor': cm2[bin]},
                         color = cm2[bin],
-                        opacity = .6
+                        opacity = 0.5
                     )
                     layout['mapbox']['layers'].append(geo_layer)
 
