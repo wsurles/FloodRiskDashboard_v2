@@ -83,6 +83,10 @@ DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159,
     'rgb(234, 120, 88)', 'rgb(218, 83, 82)', 'rgb(191, 54, 91)', 'rgb(158, 35, 98)', \
     'rgb(120, 26, 97)', 'rgb(83, 22, 84)', 'rgb(47, 15, 61)']
 
+DEFAULT_COLORSCALE_2 = ['rgb(253, 253, 204)', 'rgb(195, 232, 175)', 'rgb(135, 212, 163)', \
+    'rgb(92, 185, 163)', 'rgb(77, 156, 160)', 'rgb(67, 128, 154)', 'rgb(61, 99, 148)', \
+    'rgb(65, 69, 130)', 'rgb(57, 46, 85)', 'rgb(39, 26, 44)']
+
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
 mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
@@ -111,7 +115,7 @@ color = [
 opacity = [
     # 0.2,    # structures opacity
     # 0.4,  # census blocks opacity
-    1,  # confidence opacity
+    0,  # confidence opacity
     0.5,  # 100yr opacity
     0.7]  # 500yr opacity
 symbology_type = [
@@ -217,19 +221,16 @@ app.layout = html.Div(children=[
     }
     ),
 
-    html.Div([
-        html.P(
-            narrative1
-        )
-    ], className="row", style={
-    'background-color':'white',
-    # 'margin-right': '0px', 
-    # 'padding':'5px 5px 5px 5px', 
-    'padding':'5px', 
-    'border-radius': '3px',
+    # html.Div([
+    #     html.P(
+    #         narrative1
+    #     )
+    # ], className="row", style={
+    # 'background-color':'white', 
+    # 'padding':'5px', 
+    # 'border-radius': '3px',
     # 'margin-top':'5px',
-    # 'column-count': '3',
-    }),
+    # }),
 
     html.Div([
         dcc.Graph(
@@ -290,7 +291,7 @@ app.layout = html.Div(children=[
                     {'label': 'Display 100yr Floodplain (FHAD in progress)', 'value': 'S_100yr'},
                     {'label': 'Display 500yr Floodplain (FHAD in progress)', 'value': 'S_500yr'}
                 ],
-                values=['S_Structure', 'S_100yr', 'S_500yr'],
+                values=['S_Confidence'],
                 # values=['S_100yr'],
                 labelStyle={'display': 'block'}
             ),
@@ -307,7 +308,7 @@ app.layout = html.Div(children=[
                     min=min(steps),
                     max=max(steps),
                     step = 10,
-                    value=0,
+                    value=50,
                     marks={step: {'label': str(step)} for step in steps},
                     updatemode = 'drag',
                 )
@@ -316,20 +317,17 @@ app.layout = html.Div(children=[
                 'padding': '10px'}), 
 
             html.Br(),
-            # html.Br(),
-            # html.Hr(),
+            html.Hr(),
+            html.H5(children="Map Controls"),
 
+            # Structures colormap
             html.Div([
-                html.Hr(),
-                html.H5(children="Map Controls"),
                 html.Div([
-                    html.P(children='Select Structures Color Map',
+                    html.P(children='Structures Color Map',
                         style={
                             'font-size': '12px'}
                         )
                 ], className='five columns', style={
-                    # 'display': 'inline-block',
-                    # 'float': 'right',
                     'margin-top': '10px',
                 }),
                 html.Div([
@@ -339,12 +337,43 @@ app.layout = html.Div(children=[
                         nSwatches=10,
                         fixSwatches=True,
                     ),
-                ]),#, className='seven columns', style={
-                    # 'display': 'inline-block'
-                # }),#, className='six columns'),
+                ]),
+            ], className="row"),
+
+            # Probablistic hexagon colormap
+            html.Div([
+                html.Div([
+                    html.P(children='Probabilistic Floodplain Color Map',
+                        style={
+                            'font-size': '12px'}
+                        )
+                ], className='five columns', style={
+                    'margin-top': '10px',
+                }),
+                html.Div([
+                    dash_colorscales.DashColorscales(
+                        id='colorscale-picker2',
+                        colorscale=DEFAULT_COLORSCALE_2,
+                        nSwatches=10,
+                        fixSwatches=True,
+                    ),
+                ]),
+            ], className="row"),
+
+            html.Hr(),
+
+            html.Div([
+                html.P(
+                    narrative1
+                )
             ], className="row", style={
-                # 'display': 'inline-block'
+            'background-color':'white', 
+            'padding':'5px', 
+            'border-radius': '3px',
+            'margin-top':'5px',
             }),
+
+
         ], className='five columns', 
         style={
             'background-color':'white',
@@ -494,6 +523,18 @@ app.layout = html.Div(children=[
             ], className='row',
             style = {
                 'display': 'flex'
+            }),
+
+            # structures narrative
+            html.Div([
+                html.P(
+                    narrative1
+                )
+            ], className="row", style={
+            'background-color':'white', 
+            'padding':'5px', 
+            'border-radius': '3px',
+            'margin-top':'5px',
             }),
         ], className='seven columns',
         style={
@@ -839,11 +880,13 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
         Input('risk-checklist2', 'values'),
         Input('structurebasedrisk_dropdown','value'),
         Input('confidence-slider', 'value'),
-        Input('colorscale-picker', 'colorscale')],
+        Input('colorscale-picker', 'colorscale'),
+        Input('colorscale-picker2', 'colorscale')],
 		[State('risk-map', 'relayoutData')])
 # def display_map(values, dropdownvalue, value, colorscale, figure):
-def display_map(values, checklist2values, dropdownvalue, value, colorscale, relayoutData):
-    cm = dict(zip(BINS, colorscale))
+def display_map(values, checklist2values, dropdownvalue, value, colorscale, colorscale2, relayoutData):
+    cm = dict(zip(BINS, colorscale)) # structures color dictionary
+    cm2 = dict(zip(BINS, colorscale2)) # probabilistic floodplain color dictionary
     struct_dff = struct_df.copy()
 
     # Control of zoom and center for mapbox map
@@ -926,6 +969,8 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
     # Define base urls for use in creating geolayers
     # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
     base_layers = ['S_Confidence', 'S_100yr', 'S_500yr'] #v2
+    # base_layers = ['S_100yr', 'S_500yr'] #v2
+
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
     
@@ -937,24 +982,71 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, rela
                 sourcetype=df_geolayer_info['sourcetype'].loc[i],
                 source = base_url + df_geolayer_info['json_file'].loc[i],
                 type = df_geolayer_info['symbology_type'].loc[i],
-                # beforeLayer = df_geolayer_info['before_layer'].loc[i],
                 color = df_geolayer_info['color'].loc[i],
                 opacity = df_geolayer_info['opacity'].loc[i]
             )
             layout['mapbox']['layers'].append(geo_layer)
             # print(layout)
-        # Add selected confidence contour
-        if i=='S_Confidence':
-            base_contourfilename = 'S_contour'
-            geo_layer = dict(
-                sourcetype='geojson',
-                source = base_url + base_contourfilename + str(value) +  '.json',
-                # beforeLayer = df_geolayer_info['before_layer'].loc[i],
-                type = 'line',
-                color = '#000066',
-                opacity = 0.5
-            )
-            layout['mapbox']['layers'].append(geo_layer)
+
+            # Add selected confidence contour
+            if i=='S_Confidence':
+                # # Add selected risk contour from slider input
+                # base_contourfilename = 'S_contour'
+                # geo_layer = dict(
+                #     sourcetype='geojson',
+                #     source = base_url + base_contourfilename + str(value) +  '.json',
+                #     type = 'line',
+                #     color = '#000066',
+                #     opacity = 0.5
+                # )
+                # layout['mapbox']['layers'].append(geo_layer)
+
+            # Add risk hexagons
+                for bin in BINS:
+                    geo_layer = dict(
+                        sourcetype = 'geojson',
+                        source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+                        type ='fill',
+                        # outline = cm2[bin],
+                        fill_outline_color = cm2[bin],
+                        color = cm2[bin],
+                        opacity = .6
+                    )
+                    layout['mapbox']['layers'].append(geo_layer)
+
+                    # geo_layer = dict(
+                    #     sourcetype = 'geojson',
+                    #     source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+                    #     type ='line',
+                    #     # line = cm2[bin],
+                    #     # color = cm2[bin],
+                    #     color = cm2[bin],
+                    #     opacity = .6,
+                    # )
+                    # layout['mapbox']['layers'].append(geo_layer)
+            
+                # Add selected risk contour from slider input
+                base_contourfilename = 'S_contour'
+                geo_layer = dict(
+                    sourcetype='geojson',
+                    source = base_url + base_contourfilename + str(value) +  '.json',
+                    type = 'line',
+                    color = '#000066',
+                    opacity = 1
+                )
+                layout['mapbox']['layers'].append(geo_layer)
+
+                # # Add selected risk contour from slider input
+                # base_contourfilename = 'S_contour'
+                # geo_layer = dict(
+                #     sourcetype='geojson',
+                #     source = base_url + base_contourfilename + str(value) +  '.json',
+                #     # beforeLayer = df_geolayer_info['before_layer'].loc[i],
+                #     type = 'line',
+                #     color = '#000066',
+                #     opacity = 0.5
+                # )
+                # layout['mapbox']['layers'].append(geo_layer)
 
     # Add structure based risk to map if selected     
     for i in checklist2values:     

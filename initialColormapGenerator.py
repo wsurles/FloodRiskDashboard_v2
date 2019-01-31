@@ -25,5 +25,5 @@ def cmocean_to_plotly(cmap, pl_entries):
     # return C
 
 # # Develop initial color map from matter colormap
-matter = cmocean_to_plotly(cmocean.cm.matter, 10)
-print (matter)
+deep = cmocean_to_plotly(cmocean.cm.deep, 10)
+print (deep)
