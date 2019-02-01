@@ -900,7 +900,7 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, colo
         # zoom=12
         latInitial=39.718741
         lonInitial=-105.038733
-        zoom=15
+        zoom=16
     
     # data = dict(
     #     # lat=df_structures['lat'],
