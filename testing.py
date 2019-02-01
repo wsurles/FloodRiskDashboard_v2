@@ -29,13 +29,13 @@ shpfile = r'shp/S_Structure.shp'
 
 '''
 ~~~~~~~~~~~~~~~~
-~~ GDAL ~~
+~~ Geopandas ~~
 ~~~~~~~~~~~~~~~~
 '''
 
-dataSource = ogr.Open(shpfile)
-daLayer = dataSource.GetLayer(0)
-layerDefinition = daLayer.GetLayerDefn()
+# dataSource = ogr.Open(shpfile)
+# daLayer = dataSource.GetLayer(0)
+# layerDefinition = daLayer.GetLayerDefn()
 
 for i in range(layerDefinition.GetFieldCount()):
     print (layerDefinition.GetFieldDefn(i).GetName())
