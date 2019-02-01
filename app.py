@@ -926,7 +926,7 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, colo
         'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
         'USER': 'User Defined Weighting'}
     # legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
-    legendtitle = '<b>' + 'Structure Based Flood Risk' + '</b>'
+    legendtitle = '<b>' + 'Structure Based Flood Risk' + '\n' + 'other' + '</b>'
     annotations = [dict(
         showarrow = False,
         align = 'left',
@@ -1013,16 +1013,16 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, colo
                     )
                     layout['mapbox']['layers'].append(geo_layer)
 
-                    # geo_layer = dict(
-                    #     sourcetype = 'geojson',
-                    #     source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
-                    #     type ='line',
-                    #     # line = cm2[bin],
-                    #     # color = cm2[bin],
-                    #     color = cm2[bin],
-                    #     opacity = .6,
-                    # )
-                    # layout['mapbox']['layers'].append(geo_layer)
+                    geo_layer = dict(
+                        sourcetype = 'geojson',
+                        source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+                        type ='line',
+                        # line = cm2[bin],
+                        # color = cm2[bin],
+                        color = 'white',
+                        opacity = 0.15,
+                    )
+                    layout['mapbox']['layers'].append(geo_layer)
             
                 # Add selected risk contour from slider input
                 base_contourfilename = 'S_contour'
@@ -1031,7 +1031,7 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale, colo
                     source = base_url + base_contourfilename + str(value) +  '.json',
                     type = 'line',
                     color = '#000066',
-                    opacity = 1
+                    opacity = 0.5
                 )
                 layout['mapbox']['layers'].append(geo_layer)
 
