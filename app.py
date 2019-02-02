@@ -64,12 +64,14 @@ geojson_confidence = repo_url + '/master/jsons/S_Confidence.json'
 geojson_100yr = repo_url + '/master/jsons/S_FHAD_100yr.json'
 geojson_500yr = repo_url + '/master/jsons/S_FHAD_500yr.json'
 narrative1_url = repo_url + '/master/assets/narrative1.txt'
+narrative2_url = repo_url + '/master/assets/narrative2.txt'
 structures_shp = ('shp/S_Structure.shp')
 
 # Load Data 
 df_cg = pd.read_csv(custom_geometry_points)
 df_structures = pd.read_csv(structure_points)
 narrative1 = (requests.get(narrative1_url)).text
+narrative2 = (requests.get(narrative2_url)).text
 struct_df = gpd.read_file(structures_shp)
 
 # Define confidence interval steps for slider
@@ -90,6 +92,7 @@ DEFAULT_COLORSCALE_2 = ['rgb(253, 253, 204)', 'rgb(195, 232, 175)', 'rgb(135, 21
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
 mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
+# mapboxstyle = 'mapbox://styles/indielyt/cjreghq012thv2ssdb6mbfguu'
 # mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 # mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
 
@@ -162,7 +165,7 @@ styles = {
 all_options=[
     {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE'},
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT'},
-    {'label': '100-Year Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT'},
+    {'label': '100-Year Exceedance Probability (EP_TOT)', 'value': 'AEP_TOT'},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT'},
     {'label': 'User Defined Risk Weighting', 'value': 'USER'}
 ]
@@ -170,7 +173,7 @@ all_options=[
 no_options=[
     {'label': 'Total Risk Score (R_SCORE)', 'value': 'R_SCORE', 'disabled': True},
     {'label': 'Flood Risk Score (FR_TOT)', 'value': 'FR_TOT', 'disabled': True},
-    {'label': '100-Year Exceedance Probability (AEP_TOT)', 'value': 'AEP_TOT', 'disabled': True},
+    {'label': '100-Year Exceedance Probability (EP_TOT)', 'value': 'AEP_TOT', 'disabled': True},
     {'label': 'Flood Damage Potential (FDP_TOT)', 'value': 'FDP_TOT', 'disabled': True},
     {'label': 'User Defined Risk Weighting', 'value': 'USER', 'disabled': True}
 ]
@@ -435,19 +438,21 @@ app.layout = html.Div(children=[
                         id = 'FRTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '0',
+                        # placeholder = '0',
+                        value=35,
                         min = 0,
                         max = 100,
                         step = 5
                     ),
                 ], style = {'display':'inline-block', 'flex-basis':'15%'}),
                 html.Div([
-                    html.H6(children='AEP_TOT'),  
+                    html.H6(children='EP_TOT'),  
                     dcc.Input(
                         id = 'AEPTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '0',
+                        # placeholder = '0',
+                        value=35,
                         min = 0,
                         max = 100,
                         step = 5
@@ -459,7 +464,8 @@ app.layout = html.Div(children=[
                         id = 'FDPTOT-numericinput',
                         type = 'number',
                         size = '10',
-                        placeholder = '0',
+                        # placeholder = '0',
+                        value=30,
                         min = 0,
                         max = 100,
                         step = 5
@@ -467,7 +473,7 @@ app.layout = html.Div(children=[
                 ], style = {'display':'inline-block', 'flex-basis':'15%'}),
                 html.Div([
                     html.H6(children='', id='user-message'), 
-                    html.Button('Submit User Defined Weights', id='button')
+                    # html.Button('Submit User Defined Weights', id='button')
                 ], style={
                     'display':'inline-block', 
                     'flex-basis':'55%',
@@ -528,7 +534,7 @@ app.layout = html.Div(children=[
             # structures narrative
             html.Div([
                 html.P(
-                    narrative1
+                    narrative2
                 )
             ], className="row", style={
             'background-color':'white', 
@@ -765,7 +771,7 @@ def hide_slider(values):
     Input('risk-checklist', 'values')])
 def update_slider_message(value, values):
     if 'S_Confidence' in values:
-        return 'Displaying the {} percent confidence boundary for the 100-year floodplain boundary'.format(value)
+        return 'Displaying the {} percent confidence interval for the 100-year floodplain boundary'.format(value)
     else:
         return """Turn on Probabilistic Floodplain Modeling to view on map"""
 
@@ -807,10 +813,14 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
     # cm = dict(zip(BINS, colorscale))
 
     if clickData==None:
-        trace1 = go.Bar(x=['Total Risk'], y=[100],name='Total Risk',marker=dict(color=colorscale[9]))
-        trace2 = go.Bar(x=['Risk Components'], y=[20],name='FR_TOT',marker=dict(color=colorscale[3]))
-        trace3 = go.Bar(x=['Risk Components'], y=[40],name='AEP_TOT',marker=dict(color=colorscale[5]))
-        trace4 = go.Bar(x=['Risk Components'], y=[40],name='FDP_TOT',marker=dict(color=colorscale[7]))
+        # trace1 = go.Bar(x=['Total Risk'], y=[100],name='Total Risk',marker=dict(color=colorscale[9]))
+        # trace2 = go.Bar(x=['Risk Components'], y=[20],name='FR_TOT',marker=dict(color=colorscale[3]))
+        # trace3 = go.Bar(x=['Risk Components'], y=[40],name='EP_TOT',marker=dict(color=colorscale[5]))
+        # trace4 = go.Bar(x=['Risk Components'], y=[40],name='FDP_TOT',marker=dict(color=colorscale[7]))
+        trace1 = go.Bar(x=['Total Risk'], y=[100],name='Total Risk',marker=dict(color='#3e3e3e'))
+        trace2 = go.Bar(x=['Risk Components'], y=[20],name='FR_TOT',marker=dict(color='#919090'))
+        trace3 = go.Bar(x=['Risk Components'], y=[40],name='EP_TOT',marker=dict(color='#7d7c7c'))
+        trace4 = go.Bar(x=['Risk Components'], y=[40],name='FDP_TOT',marker=dict(color='#686767'))
 
         figure=dict(
             data=[trace1, trace2, trace3, trace4],
@@ -842,10 +852,10 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
         annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
         floodDamage = df_structures.loc[df_structures.FID == structFID, 'FDP_TOT'].values[0]
 
-        newtrace1 = go.Bar(x=['Total Risk'], y=[totalrisk], name='R_SCORE', marker=dict(color=colorscale[9]))
-        newtrace2 = go.Bar(x=['Risk Components'], y=[0.2*floodrisk], name='FR_TOT', marker=dict(color=colorscale[3]))
-        newtrace3 = go.Bar(x=['Risk Components'], y=[0.4*annualExceedence], name='AEP_TOT', marker=dict(color=colorscale[5]))
-        newtrace4 = go.Bar(x=['Risk Components'], y=[0.4*floodDamage], name='FDP_TOT', marker=dict(color=colorscale[7]))
+        newtrace1 = go.Bar(x=['Total Risk'], y=[totalrisk], name='R_SCORE', marker=dict(color='#3e3e3e'))
+        newtrace2 = go.Bar(x=['Risk Components'], y=[0.2*floodrisk], name='FR_TOT', marker=dict(color='#919090'))
+        newtrace3 = go.Bar(x=['Risk Components'], y=[0.4*annualExceedence], name='EP_TOT', marker=dict(color='#7d7c7c'))
+        newtrace4 = go.Bar(x=['Risk Components'], y=[0.4*floodDamage], name='FDP_TOT', marker=dict(color='#686767'))
 
         figure=dict(
             data=[newtrace1, newtrace2, newtrace3, newtrace4],
@@ -882,10 +892,13 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
         Input('confidence-slider', 'value'),
         Input('colorscale-picker', 'colorscale'),
         Input('colorscale-picker2', 'colorscale')],
-		[State('risk-map', 'relayoutData')])
+		[State('risk-map', 'relayoutData'),
+        State('FRTOT-numericinput','value'),
+        State('AEPTOT-numericinput', 'value'),
+        State('FDPTOT-numericinput', 'value')])
 # def display_map(values, dropdownvalue, value, colorscale, figure):
 def display_map(values, checklist2values, dropdownvalue, value, colorscale, 
-    colorscale2, relayoutData):
+    colorscale2, relayoutData, FRstate, AEPstate, FDPstate):
     cm = dict(zip(BINS, colorscale)) # structures color dictionary
     cm2 = dict(zip(BINS, colorscale2)) # probabilistic floodplain color dictionary
     struct_dff = struct_df.copy()
@@ -897,38 +910,19 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
         lonInitial = (relayoutData['mapbox.center']['lon'])
         zoom = (relayoutData['mapbox.zoom'])
     except: # incase of using checklist before changing map extent
-        # latInitial=39.715
-        # lonInitial=-105.065
-        # zoom=12
         latInitial=39.718741
         lonInitial=-105.038733
         zoom=16
-    
-    # data = dict(
-    #     # lat=df_structures['lat'],
-    #     # lon=df_structures['lon'],
-    #     lat=struct_dff['lat'],
-    #     lon=struct_dff['lon'],
-    #     customdata=customdatalist,
-    #     hoverinfo = 'text', # for adding hover info to buildings
-    #     # hoverinfo = 'none', # use this for testing, turns hover labels off
-    #     # text=df_structures[dropdownvalue],
-    #     text=struct_dff[[dropdownvalue],
-    #     type='scattermapbox',
-    #     marker=dict(
-    #         size=10
-    #     ),
-    #     opacity = 0,
-    # ),
+
 
     # define legend, title, and location
     title_dict = {'R_SCORE': 'Total Risk Score (R_SCORE)', 
         'FR_TOT': 'Flood Risk (FR_TOT)',
-        'AEP_TOT': '100-Year Exceedence Probability (AEP_TOT)', 
+        'AEP_TOT': '100-Year Exceedence Probability (EP_TOT)', 
         'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
         'USER': 'User Defined Weighting'}
     # legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
-    legendtitle = '<b>' + 'Structure Based Flood Risk' + '\n' + 'other' + '</b>'
+    legendtitle = '<b>' + 'Structure Based Flood Risk' + '</b>'
     annotations = [dict(
         showarrow = False,
         align = 'left',
@@ -988,20 +982,9 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
                 opacity = df_geolayer_info['opacity'].loc[i]
             )
             layout['mapbox']['layers'].append(geo_layer)
-            # print(layout)
 
             # Add selected confidence contour
             if i=='S_Confidence':
-                # # Add selected risk contour from slider input
-                # base_contourfilename = 'S_contour'
-                # geo_layer = dict(
-                #     sourcetype='geojson',
-                #     source = base_url + base_contourfilename + str(value) +  '.json',
-                #     type = 'line',
-                #     color = '#000066',
-                #     opacity = 0.5
-                # )
-                # layout['mapbox']['layers'].append(geo_layer)
 
             # Add risk hexagons
                 for bin in BINS:
@@ -1037,17 +1020,6 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
                 )
                 layout['mapbox']['layers'].append(geo_layer)
 
-                # # Add selected risk contour from slider input
-                # base_contourfilename = 'S_contour'
-                # geo_layer = dict(
-                #     sourcetype='geojson',
-                #     source = base_url + base_contourfilename + str(value) +  '.json',
-                #     # beforeLayer = df_geolayer_info['before_layer'].loc[i],
-                #     type = 'line',
-                #     color = '#000066',
-                #     opacity = 0.5
-                # )
-                # layout['mapbox']['layers'].append(geo_layer)
 
     # Add structure based risk to map if selected     
     for i in checklist2values:     
@@ -1055,36 +1027,28 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
         if i=='S_Structure':
             # Calculate geolayer if user defined weighting is selected
             if dropdownvalue=='USER':
-                pass
+                struct_dff['USER'] = (struct_dff['FR_TOT']*(FRstate/100)) + \
+                    (struct_dff['AEP_TOT']*(AEPstate/100)) + \
+                    (struct_dff['FDP_TOT']*(FDPstate/100)) 
 
-                # need to create 'USER' field in struct_dff and calc to that field (for annotations).
 
+                for bin in BINS:
+                # Calculate geolayer if user defined weighting is selected
+                    low = int(bin.split('-')[0])
+                    high = int(bin.split('-')[1]) 
 
-                # struct_dff = struct_df.copy()
-                # struct_dff['USER'] = struct_df['R_SCORE']
-                # for bin in BINS:
-                # # Calculate geolayer if user defined weighting is selected
-                #     low = int(bin.split('-')[0])
-                #     high = int(bin.split('-')[1]) 
+                    # query the structure dataframe for values in each bin range by user's dropdown value
+                    bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
+                    bin_json = json.loads(bin_data.to_json())
 
-                #     # query the structure dataframe for values in each bin range by user's dropdown value
-                #     bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
-                #     bin_json = json.loads(bin_data.to_json())
-
-                #     geo_layer = dict(
-                #             sourcetype = 'geojson',
-                #             source = bin_json,
-                #             type ='fill',
-                #             # beforeLayer = df_geolayer_info['before_layer'].loc[i],
-                #             # paint={
-                #             #     # 'fill-color' : cm[bin],
-                #             #     'fill-outline-color' : cm[bin],
-                #             #     'fill-opacity' : 0.95
-                #             # },
-                #             color = cm[bin],
-                #             opacity = 1
-                #     )
-                #     layout['mapbox']['layers'].append(geo_layer)
+                    geo_layer = dict(
+                            sourcetype = 'geojson',
+                            source = bin_json,
+                            type ='fill',
+                            color = cm[bin],
+                            opacity = 1
+                    )
+                    layout['mapbox']['layers'].append(geo_layer)
 
             # Serve prebuilt geolayer if not user defined weighting
             else:
