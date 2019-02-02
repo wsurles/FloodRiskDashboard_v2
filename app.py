@@ -884,10 +884,12 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
         Input('colorscale-picker2', 'colorscale')],
 		[State('risk-map', 'relayoutData')])
 # def display_map(values, dropdownvalue, value, colorscale, figure):
-def display_map(values, checklist2values, dropdownvalue, value, colorscale, colorscale2, relayoutData):
+def display_map(values, checklist2values, dropdownvalue, value, colorscale, 
+    colorscale2, relayoutData):
     cm = dict(zip(BINS, colorscale)) # structures color dictionary
     cm2 = dict(zip(BINS, colorscale2)) # probabilistic floodplain color dictionary
     struct_dff = struct_df.copy()
+    struct_dff['USER']=0
 
     # Control of zoom and center for mapbox map
     try: # hold existing map extent constant during user interaction
