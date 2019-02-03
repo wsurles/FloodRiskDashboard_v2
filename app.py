@@ -81,19 +81,31 @@ steps = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0]
 BINS = ['0-10', '10-20', '20-30', '30-40', '40-50', '50-60', \
 		'60-70', '70-80', '80-90', '90-100']
 
-DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159, 109)', \
-    'rgb(234, 120, 88)', 'rgb(218, 83, 82)', 'rgb(191, 54, 91)', 'rgb(158, 35, 98)', \
-    'rgb(120, 26, 97)', 'rgb(83, 22, 84)', 'rgb(47, 15, 61)']
+# Structures colors = cmocean's dense
+DEFAULT_COLORSCALE = ['rgb(230, 240, 240)', 'rgb(183, 217, 228)', 'rgb(143, 192, 226)', \
+    'rgb(118, 163, 228)', 'rgb(116, 131, 223)', 'rgb(121, 96, 199)', 'rgb(118, 66, 164)', \
+    'rgb(106, 39, 120)', 'rgb(85, 22, 74)', 'rgb(54, 14, 36)']
 
-DEFAULT_COLORSCALE_2 = ['rgb(253, 253, 204)', 'rgb(195, 232, 175)', 'rgb(135, 212, 163)', \
-    'rgb(92, 185, 163)', 'rgb(77, 156, 160)', 'rgb(67, 128, 154)', 'rgb(61, 99, 148)', \
-    'rgb(65, 69, 130)', 'rgb(57, 46, 85)', 'rgb(39, 26, 44)']
+# Structures colors - cmocean's matter
+# DEFAULT_COLORSCALE = ['rgb(253, 237, 176)', 'rgb(249, 198, 139)', 'rgb(244, 159, 109)', \
+#     'rgb(234, 120, 88)', 'rgb(218, 83, 82)', 'rgb(191, 54, 91)', 'rgb(158, 35, 98)', \
+#     'rgb(120, 26, 97)', 'rgb(83, 22, 84)', 'rgb(47, 15, 61)']
+
+# Probabilistic floodplain colors - cmocean's thermal
+DEFAULT_COLORSCALE_2 = ['rgb(3, 35, 51)', 'rgb(18, 50, 113)', 'rgb(73, 54, 159)', \
+    'rgb(115, 73, 146)', 'rgb(154, 88, 136)', 'rgb(197, 101, 119)', 'rgb(234, 120, 87)', \
+    'rgb(251, 157, 61)', 'rgb(248, 203, 67)', 'rgb(231, 250, 90)']
+
+# Probabilistic floodplain colors - cmocean's YlGnBu
+# DEFAULT_COLORSCALE_2 = ['rgb(253, 253, 204)', 'rgb(195, 232, 175)', 'rgb(135, 212, 163)', \
+#     'rgb(92, 185, 163)', 'rgb(77, 156, 160)', 'rgb(67, 128, 154)', 'rgb(61, 99, 148)', \
+#     'rgb(65, 69, 130)', 'rgb(57, 46, 85)', 'rgb(39, 26, 44)']
 
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
-mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
+# mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
 # mapboxstyle = 'mapbox://styles/indielyt/cjreghq012thv2ssdb6mbfguu'
-# mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 # mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
 
 # Define symbology for json layers
@@ -477,7 +489,7 @@ app.layout = html.Div(children=[
                 ], style={
                     'display':'inline-block', 
                     'flex-basis':'55%',
-                    # 'margin-top':'0px',
+                    'margin-top':'35px',
                     'padding-left':'5%'}
                 )
             ], style={'display':'flex', 'margin-bottom':'15px'}),
@@ -655,18 +667,52 @@ def hide_slider(value):
     Input('structurebasedrisk_dropdown', 'value')])
 def sum_user_weights(FRTOTval, AEPTOTval, FDPTOTval, dropdownvalue):
     if dropdownvalue == 'USER':
-        if FRTOTval==None:# or AEPTOTval==None or FDPTOTval==None:
-            message = f"Provide three weights"
+        user_sum = FRTOTval + AEPTOTval + FDPTOTval
+        if user_sum != 100:
+            message = f"Sum = {user_sum}%. Must equal 100 %"
         else:
-            user_sum = FRTOTval + AEPTOTval + FDPTOTval
-            if user_sum != 100:
-                message = f"Sum = {user_sum}%. Must equal 100 %"
-            else:
-                message = f"Click submit to update map."    
-    else: 
-        message = " "
-        
-    return message
+            # message = f"Click submit to update map."   
+            message = 'Loading User Risk Weights' 
+
+        return message
+
+
+
+
+# Update Structure Risk Click Data
+@app.callback(
+    Output('click-data', 'children'),
+    [Input('structurebasedrisk_dropdown','value'),
+    Input('risk-map', 'clickData')], 
+    [State('FRTOT-numericinput','value'),
+    State('AEPTOT-numericinput', 'value'),
+    State('FDPTOT-numericinput', 'value')])
+def display_click_data(value, clickData, state1, state2, state3):
+    if clickData==None:
+        click_message = f"Total Risk Score: " + '\n' + \
+            f"Flood Risk: " + '\n' +  \
+            f"100-Year Exceedence Probability: " + '\n' + \
+            f"Flood Damage Potential: " + '\n' + \
+            f"User Defined Risk Score: "
+        return click_message
+    else:
+        structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
+        floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
+        annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
+        floodDamage = df_structures.loc[df_structures.FID == structFID, 'FDP_TOT'].values[0]
+        if value == 'USER':
+            userRisk = (floodrisk*(state1/100)) + (annualExceedence*(state2/100)) + (floodDamage*(state3/100))
+        else:
+            userRisk = 'na'
+        click_message = f"Total Risk Score: {totalrisk}" + '\n' + \
+            f"Flood Risk: {floodrisk}" + '\n' +  \
+            f"Annual Exceedence Probability: {annualExceedence}" + '\n' + \
+            f"Flood Damage Potential: {floodDamage}" + '\n' + \
+            f"User Defined Risk Score: {userRisk}"
+        return click_message
+        # return json.dumps(clickData, indent=2)
+
 
 
 
@@ -718,19 +764,6 @@ def update_image(clickData):
 
 
 
-
-# Structure based risk dropdown message
-# @app.callback(
-#     Output('dropdown-message', 'children'),
-#     [Input('risk-checklist', 'values')
-#     ])
-# def update_dropdown_message(values):
-#     if 'S_Structure' in values:
-#         return 'Visualize scoring of structure based flood risk'
-#     else:
-#         return 'Turn on Structure Based Flood Risk to view on map'
-
-
 # Update dropdown menu for structure based risk
 @app.callback(
     Output('structurebasedrisk_dropdown', 'options'),
@@ -776,40 +809,15 @@ def update_slider_message(value, values):
         return """Turn on Probabilistic Floodplain Modeling to view on map"""
 
 
-# Update Structure Risk Click Data
-@app.callback(
-    Output('click-data', 'children'),
-    [Input('risk-map', 'clickData')])
-def display_click_data(clickData):
-    if clickData==None:
-        click_message = f"Total Risk Score: " + '\n' + \
-            f"Flood Risk: " + '\n' +  \
-            f"100-Year Exceedence Probability: " + '\n' + \
-            f"Flood Damage Potential: "
-        return click_message
-    else:
-        structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
-        # pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
-        # structFID = pointnumber+1  # 1 based index FID number from spatial data
-        totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
-        floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
-        annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
-        floodDamage = df_structures.loc[df_structures.FID == structFID, 'FDP_TOT'].values[0]
-        click_message = f"Total Risk Score: {totalrisk}" + '\n' + \
-            f"Flood Risk: {floodrisk}" + '\n' +  \
-            f"Annual Exceedence Probability: {annualExceedence}" + '\n' + \
-            f"Flood Damage Potential: {floodDamage}"
-        return click_message
-        # return json.dumps(clickData, indent=2)
 
 
 # Update bar graph
 @app.callback(
     Output('stackedbar', 'figure'),
     [Input('risk-map', 'clickData'),
-    Input('risk-map', 'figure'),
+    # Input('risk-map', 'figure'),
     Input('colorscale-picker', 'colorscale')])
-def update_bar_chart(clickData, riskmapfigure, colorscale):
+def update_bar_chart(clickData, colorscale):
     # cm = dict(zip(BINS, colorscale))
 
     if clickData==None:
@@ -843,10 +851,8 @@ def update_bar_chart(clickData, riskmapfigure, colorscale):
         )
     else:
         structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
-        # pointnumber = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
         trace_lat = clickData['points'][0]['lat']
         trace_lon = clickData['points'][0]['lon']
-        # structFID = pointnumber+1  # 1 based index FID number from spatial data
         totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
         floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
         annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
@@ -994,20 +1000,20 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
                         type ='fill',
                         fill = {'outlinecolor': cm2[bin]},
                         color = cm2[bin],
-                        opacity = 0.5
+                        opacity = 0.6
                     )
                     layout['mapbox']['layers'].append(geo_layer)
 
-                    geo_layer = dict(
-                        sourcetype = 'geojson',
-                        source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
-                        type ='line',
-                        # line = cm2[bin],
-                        # color = cm2[bin],
-                        color = 'white',
-                        opacity = 0.15,
-                    )
-                    layout['mapbox']['layers'].append(geo_layer)
+                    # geo_layer = dict(
+                    #     sourcetype = 'geojson',
+                    #     source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+                    #     type ='line',
+                    #     # line = cm2[bin],
+                    #     # color = cm2[bin],
+                    #     color = 'white',
+                    #     opacity = 0.15,
+                    # )
+                    # layout['mapbox']['layers'].append(geo_layer)
             
                 # Add selected risk contour from slider input
                 base_contourfilename = 'S_contour'
