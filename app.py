@@ -296,7 +296,16 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div([
             html.H5(children='Area Based Flood Hazards'), 
-            html.Hr(),           
+            html.Hr(),  
+            dcc.RadioItems(
+                id = 'risk-radiobutton',
+                options=[
+                    {'label': 'Display Probabilistic Floodplain Heatmap (1% AEP)', 'value': 'S_Confidence'},
+                    {'label': 'Display Deterministic Floodplain (1% and .02% AEP)', 'value': 'S_Fld_Haz'}
+                ],
+                value='S_Confidence',
+                labelStyle={'display': 'block'}
+            ),         
             dcc.Checklist(
                 id = 'risk-checklist',
                 options=[
