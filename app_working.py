@@ -730,11 +730,11 @@ def display_click_data(value, clickData, state1, state2, state3):
         return click_message
     else:
         structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
-        structFID = structFID-1
-        totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
-        floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
-        annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
-        floodDamage = df_structures.loc[df_structures.FID == structFID, 'FDP_TOT'].values[0]
+        structFID = structFID+1
+        totalrisk = df_structures.loc[df_structures.OBJECTID == structFID, 'R_SCORE'].values[0]
+        floodrisk = df_structures.loc[df_structures.OBJECTID == structFID, 'FR_TOT'].values[0]
+        annualExceedence = df_structures.loc[df_structures.OBJECTID == structFID, 'AEP_TOT'].values[0]
+        floodDamage = df_structures.loc[df_structures.OBJECTID == structFID, 'FDP_TOT'].values[0]
         if value == 'USER':
             userRisk = (floodrisk*(state1/100)) + (annualExceedence*(state2/100)) + (floodDamage*(state3/100))
         else:
@@ -744,8 +744,8 @@ def display_click_data(value, clickData, state1, state2, state3):
             f"100yr Exceedence Probability: {annualExceedence}" + '\n' + \
             f"Flood Damage Potential: {floodDamage}" + '\n' + \
             f"User Defined Risk Score: {userRisk}"
-        # return click_message
-        return json.dumps(clickData, indent=2)
+        return click_message
+        # return json.dumps(clickData, indent=2)
 
 
 
@@ -885,12 +885,13 @@ def update_bar_chart(clickData, colorscale):
         )
     else:
         structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        structFID = structFID + 1
         trace_lat = clickData['points'][0]['lat']
         trace_lon = clickData['points'][0]['lon']
-        totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
-        floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
-        annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
-        floodDamage = df_structures.loc[df_structures.FID == structFID, 'FDP_TOT'].values[0]
+        totalrisk = df_structures.loc[df_structures.OBJECTID == structFID, 'R_SCORE'].values[0]
+        floodrisk = df_structures.loc[df_structures.OBJECTID == structFID, 'FR_TOT'].values[0]
+        annualExceedence = df_structures.loc[df_structures.OBJECTID == structFID, 'AEP_TOT'].values[0]
+        floodDamage = df_structures.loc[df_structures.OBJECTID == structFID, 'FDP_TOT'].values[0]
 
         newtrace1 = go.Bar(x=['Total Risk'], y=[totalrisk], name='R_SCORE', marker=dict(color='#3e3e3e'))
         newtrace2 = go.Bar(x=['Risk Components'], y=[0.2*floodrisk], name='FR_TOT', marker=dict(color='#919090'))
