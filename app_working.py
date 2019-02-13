@@ -56,7 +56,7 @@ key = "&key=" + "AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI" #key
 # Data sources
 repo_url = 'https://raw.githubusercontent.com/indielyt/FloodRiskDashboard_v2'
 
-custom_geometry_points = repo_url + '/master/S_CustomGeometries_centroids.csv'
+# custom_geometry_points = repo_url + '/master/S_CustomGeometries_centroids.csv'
 structure_points = repo_url + '/master/S_Structure_centroids.csv'
 geojson_structures = repo_url + '/master/jsons/S_Structure.json'
 geojson_census = repo_url + '/master/jsons/S_CustomGeometries.json'
@@ -68,7 +68,7 @@ narrative2_url = repo_url + '/master/assets/narrative2.txt'
 structures_shp = ('shp/S_Structure.shp')
 
 # Load Data 
-df_cg = pd.read_csv(custom_geometry_points)
+# df_cg = pd.read_csv(custom_geometry_points)
 df_structures = pd.read_csv(structure_points)
 narrative1 = (requests.get(narrative1_url)).text
 narrative2 = (requests.get(narrative2_url)).text
@@ -103,44 +103,44 @@ DEFAULT_COLORSCALE_2 = ['rgb(3, 35, 51)', 'rgb(18, 50, 113)', 'rgb(73, 54, 159)'
 
 # mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
 # mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
-# mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
+mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
 # mapboxstyle = 'mapbox://styles/indielyt/cjreghq012thv2ssdb6mbfguu'
-mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+# mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
 # mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
 
 # Define symbology for json layers
 geo_index = [
-    # 'S_Structure',         # structures index
+    'S_Structure',         # structures index
     # 'S_CustomGeometries',  # census blocks index
     'S_Confidence',        # confidence index
     'S_100yr',             # 100yr index
     'S_500yr']             # 500yr index
 sourcetype = [
-    # 'geojson', # structures sourcetype
+    'geojson', # structures sourcetype
     # 'geojson', # census sourcetype
     'geojson', # confidence sourcetype
     'geojson', # 100yr sourcetype
     'geojson'] # 500yr sourcetype
 color = [
-    # '#D3D3D3', # structures color
+    '#D3D3D3', # structures color
     # '#484848', # census blocks color
     '#80b3ff', # confidence color
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    # 0.2,    # structures opacity
+    0.1,    # structures opacity
     # 0.4,  # census blocks opacity
     0,  # confidence opacity
     0.5,  # 100yr opacity
     0.7]  # 500yr opacity
 symbology_type = [
-    # 'fill',  # structures symbology
+    'fill',  # structures symbology
     # 'line',  # census block symbology
     'line',  # confidence symbology
     'fill',  # 100yr symbology
     'fill']  # 500yr symbology
 json_file = [
-    # 'S_Structure.json',         # structures json
+    'S_Structure.json',         # structures json
     # 'S_CustomGeometries.json',  # census blocks json
     'S_Confidence.json',        # confidence json
     'S_FHAD_100yr.json',        # 100yr json
@@ -153,7 +153,7 @@ json_file = [
 #     'S_500yr',          # 100yr json
 #     'water']            # 500yr json
 before_layer = [    
-    # 'S_Confidence',          # structures json
+    'S_Confidence',          # structures json
     # 'S_500yr',        # census blocks json
     'S_Structure',      # confidence json
     'S_100yr',          # 100yr json
@@ -320,6 +320,8 @@ app.layout = html.Div(children=[
                     values=['S_100yr', 'S_500yr'],
                     labelStyle={'display': 'block'}
                 ),
+                # html.Br(),
+                html.Hr(),
             ]),                  
             dcc.Checklist(
                 id = 'risk-checklist',
@@ -728,6 +730,7 @@ def display_click_data(value, clickData, state1, state2, state3):
         return click_message
     else:
         structFID = clickData['points'][0]['pointNumber'] # zero based index number assigned by app
+        structFID = structFID-1
         totalrisk = df_structures.loc[df_structures.FID == structFID, 'R_SCORE'].values[0]
         floodrisk = df_structures.loc[df_structures.FID == structFID, 'FR_TOT'].values[0]
         annualExceedence = df_structures.loc[df_structures.FID == structFID, 'AEP_TOT'].values[0]
@@ -741,8 +744,8 @@ def display_click_data(value, clickData, state1, state2, state3):
             f"100yr Exceedence Probability: {annualExceedence}" + '\n' + \
             f"Flood Damage Potential: {floodDamage}" + '\n' + \
             f"User Defined Risk Score: {userRisk}"
-        return click_message
-        # return json.dumps(clickData, indent=2)
+        # return click_message
+        return json.dumps(clickData, indent=2)
 
 
 
@@ -923,25 +926,30 @@ def update_bar_chart(clickData, colorscale):
 # Update map figure  
 @app.callback(
 		Output('risk-map', 'figure'),
-		[Input('risk-checklist', 'values'),
-        Input('risk-checklist2', 'values'),
-        Input('structurebasedrisk_dropdown','value'),
-        Input('confidence-slider', 'value'),
-        Input('colorscale-picker', 'colorscale'),
-        Input('colorscale-picker2', 'colorscale')],
-		[State('risk-map', 'relayoutData'),
-        State('FRTOT-numericinput','value'),
-        State('AEPTOT-numericinput', 'value'),
-        State('FDPTOT-numericinput', 'value')])
-# def display_map(values, dropdownvalue, value, colorscale, figure):
-def display_map(values, checklist2values, dropdownvalue, value, colorscale, 
-    colorscale2, relayoutData, FRstate, AEPstate, FDPstate):
+		[Input('risk-radiobutton', 'value'), # probabalistic vs. deterministic floodplains
+        Input('deterministic-risk-checklist', 'values'), # Deterministic checklist
+        Input('risk-checklist', 'values'), # 100yr and/or 500yr floodplain
+        Input('risk-checklist2', 'values'), # structure based risks (y/n)
+        Input('structurebasedrisk_dropdown','value'), # structure risk type selection
+        Input('confidence-slider', 'value'), # confidence contour selection
+        Input('colorscale-picker', 'colorscale'), # structures color picker
+        Input('colorscale-picker2', 'colorscale')], # heatmap color picker
+		[State('risk-map', 'relayoutData'), # state of zoom
+        State('FRTOT-numericinput','value'), # state of user input
+        State('AEPTOT-numericinput', 'value'), # state of user input
+        State('FDPTOT-numericinput', 'value')]) # state of user input
+def display_map(radiovalue, deterministicvalues, values, checklist2values, dropdownvalue, 
+    value, colorscale, colorscale2, relayoutData, FRstate, AEPstate, FDPstate):
+
+    # COLORS
     cm = dict(zip(BINS, colorscale)) # structures color dictionary
     cm2 = dict(zip(BINS, colorscale2)) # probabilistic floodplain color dictionary
+
+    # USER DATA FRAME FOR MULTIPLE APP USERS
     struct_dff = struct_df.copy()
     struct_dff['USER']=0
 
-    # Control of zoom and center for mapbox map
+    # CONTROL OF ZOOM
     try: # hold existing map extent constant during user interaction
         latInitial = (relayoutData['mapbox.center']['lat'])
         lonInitial = (relayoutData['mapbox.center']['lon'])
@@ -951,14 +959,12 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
         lonInitial=-105.038733
         zoom=16
 
-
-    # define legend, title, and location
+    # LEGEND, TITLE, AND LOCATION
     title_dict = {'R_SCORE': 'Total Risk Score (R_SCORE)', 
         'FR_TOT': 'Flood Risk (FR_TOT)',
         'AEP_TOT': '100-Year Exceedence Probability (EP_TOT)', 
         'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
         'USER': 'User Defined Weighting'}
-    # legendtitle = '<b>' + title_dict[dropdownvalue] + '</b>'
     legendtitle = '<b>' + 'Structure Based Flood Risk' + '</b>'
     annotations = [dict(
         showarrow = False,
@@ -967,7 +973,6 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
         x = 0.02, # legend title location (% from left)
         y = 0.98, # legend title location (% from bottom)
 	)]
-
     for i, bin in enumerate(BINS):
         color = cm[bin]
         annotations.append(
@@ -985,6 +990,7 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
 			)
 		)
 
+    # BASE LAYOUT
     layout = dict(
         margin = dict(l = 0, r = 0, t = 0, b = 0),
         # plot_bgcolor="#191A1A",
@@ -1001,132 +1007,141 @@ def display_map(values, checklist2values, dropdownvalue, value, colorscale,
 
     # Define base urls for use in creating geolayers
     # base_layers = ['S_Structure', 'S_Confidence', 'S_CustomGeometries', 'S_100yr', 'S_500yr'] #v1
-    base_layers = ['S_Confidence', 'S_100yr', 'S_500yr'] #v2
+    # base_layers = ['S_Confidence', 'S_100yr', 'S_500yr'] #v2
     # base_layers = ['S_100yr', 'S_500yr'] #v2
-
     base_url = repo_url + '/master/jsons/' #v2
     base_risk_url = repo_url + '/master/' #v2
     
-    # Add flood hazard risk layers to map if selected
-    for i in values:
-        # Add base layers to layout if in checklist
-        if i in base_layers:
+
+    # ADD PROBABILISTIC OR DETERMINISTIC FLOODPLAINS - DEPENDING ON RADIO BUTTON
+    if radiovalue=='S_Confidence':
+        # Add risk hexagons
+        for bin in BINS:
             geo_layer = dict(
-                sourcetype=df_geolayer_info['sourcetype'].loc[i],
-                source = base_url + df_geolayer_info['json_file'].loc[i],
-                type = df_geolayer_info['symbology_type'].loc[i],
-                color = df_geolayer_info['color'].loc[i],
-                opacity = df_geolayer_info['opacity'].loc[i]
+                sourcetype = 'geojson',
+                source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+                type ='fill',
+                fill = {'outlinecolor': cm2[bin]},
+                color = cm2[bin],
+                opacity = 0.6
             )
             layout['mapbox']['layers'].append(geo_layer)
 
-            # Add selected confidence contour
-            if i=='S_Confidence':
-
-            # Add risk hexagons
-                for bin in BINS:
-                    geo_layer = dict(
-                        sourcetype = 'geojson',
-                        source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
-                        type ='fill',
-                        fill = {'outlinecolor': cm2[bin]},
-                        color = cm2[bin],
-                        opacity = 0.6
-                    )
-                    layout['mapbox']['layers'].append(geo_layer)
-
-                    # geo_layer = dict(
-                    #     sourcetype = 'geojson',
-                    #     source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
-                    #     type ='line',
-                    #     # line = cm2[bin],
-                    #     # color = cm2[bin],
-                    #     color = 'white',
-                    #     opacity = 0.15,
-                    # )
-                    # layout['mapbox']['layers'].append(geo_layer)
-            
-                # Add selected risk contour from slider input
-                base_contourfilename = 'S_contour'
+    elif radiovalue=='S_Fld_Haz':
+        base_layers = ['S_100yr', 'S_500yr'] #v2
+        # Add flood hazard risk layers to map if selected
+        for i in deterministicvalues:
+            # Add base layers to layout if in checklist
+            if i in base_layers:
                 geo_layer = dict(
-                    sourcetype='geojson',
-                    source = base_url + base_contourfilename + str(value) +  '.json',
-                    type = 'line',
-                    color = '#000066',
-                    opacity = 0.5
+                    sourcetype=df_geolayer_info['sourcetype'].loc[i],
+                    source = base_url + df_geolayer_info['json_file'].loc[i],
+                    type = df_geolayer_info['symbology_type'].loc[i],
+                    color = df_geolayer_info['color'].loc[i],
+                    opacity = df_geolayer_info['opacity'].loc[i]
                 )
                 layout['mapbox']['layers'].append(geo_layer)
 
+            # Add selected confidence contour
+            # if i=='S_Confidence':
 
-    # Add structure based risk to map if selected     
-    for i in checklist2values:     
-        # Add risk scoring type if selected in checkbox   
-        if i=='S_Structure':
-            # Calculate geolayer if user defined weighting is selected
-            if dropdownvalue=='USER':
-                struct_dff['USER'] = (struct_dff['FR_TOT']*(FRstate/100)) + \
-                    (struct_dff['AEP_TOT']*(AEPstate/100)) + \
-                    (struct_dff['FDP_TOT']*(FDPstate/100)) 
+            # # Add risk hexagons
+            #     for bin in BINS:
+            #         geo_layer = dict(
+            #             sourcetype = 'geojson',
+            #             source = base_risk_url + 'CONF' + '/' + bin +  '.geojson',
+            #             type ='fill',
+            #             fill = {'outlinecolor': cm2[bin]},
+            #             color = cm2[bin],
+            #             opacity = 0.6
+            #         )
+            #         layout['mapbox']['layers'].append(geo_layer)
+
+    # ADD CONFIDENCE CONTOUR IF SELECTED (SLIDER SELECTS CONFIDENCE LEVEL)
+    if 'S_Confidence' in values:       
+        base_contourfilename = 'S_contour'
+        geo_layer = dict(
+            sourcetype='geojson',
+            source = base_url + base_contourfilename + str(value) +  '.json',
+            type = 'line',
+            color = '#000066',
+            opacity = 0.5
+        )
+        layout['mapbox']['layers'].append(geo_layer)
 
 
-                for bin in BINS:
-                # Calculate geolayer if user defined weighting is selected
-                    low = int(bin.split('-')[0])
-                    high = int(bin.split('-')[1]) 
+    # ADD STRUCTURE BASED RISK IF SELECTED    
+    # for i in checklist2values:       
+    if 'S_Structure' in checklist2values:
+        # ADD NON SCORING BUILDINGS AS BACKGROUND
+        geo_layer = dict(
+            sourcetype=df_geolayer_info['sourcetype'].loc['S_Structure'],
+            source = base_url + df_geolayer_info['json_file'].loc['S_Structure'],
+            type = df_geolayer_info['symbology_type'].loc['S_Structure'],
+            color = df_geolayer_info['color'].loc['S_Structure'],
+            opacity = df_geolayer_info['opacity'].loc['S_Structure']
+        )
+        layout['mapbox']['layers'].append(geo_layer)
 
-                    # query the structure dataframe for values in each bin range by user's dropdown value
-                    bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
-                    bin_json = json.loads(bin_data.to_json())
+        # CALCULATE GEOLAYER IF USER DEFINED WEIGHTS IS SELECTED
+        if dropdownvalue=='USER':
+            struct_dff['USER'] = (struct_dff['FR_TOT']*(FRstate/100)) + \
+                (struct_dff['AEP_TOT']*(AEPstate/100)) + \
+                (struct_dff['FDP_TOT']*(FDPstate/100)) 
 
-                    geo_layer = dict(
-                            sourcetype = 'geojson',
-                            source = bin_json,
-                            type ='fill',
-                            color = cm[bin],
-                            opacity = 1
-                    )
-                    layout['mapbox']['layers'].append(geo_layer)
+            for bin in BINS:
+            # Calculate low and high for each bin interval (parsing bin name)
+                low = int(bin.split('-')[0])
+                high = int(bin.split('-')[1]) 
 
-            # Serve prebuilt geolayer if not user defined weighting
-            else:
-                for bin in BINS:
-                    geo_layer = dict(
-                            sourcetype = 'geojson',
-                            source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
-                            type ='fill',
-                            # beforeLayer = df_geolayer_info['before_layer'].loc[i],
-                            # paint=dict(
-                            #     fill-color = cm[bin],
-                            #     fill-outline-color = cm[bin],
-                            #     fill-opacity = 0.95
-                            # )
-                            color = cm[bin],
-                            opacity = 1
-                    )
+                # query the structure dataframe for values in each bin range by user's dropdown value
+                bin_data = struct_dff[struct_dff[dropdownvalue].between(low,high,inclusive=False)]
+                bin_json = json.loads(bin_data.to_json())
 
-                    layout['mapbox']['layers'].append(geo_layer)
+                geo_layer = dict(
+                        sourcetype = 'geojson',
+                        source = bin_json,
+                        type ='fill',
+                        color = cm[bin],
+                        opacity = 1
+                )
+                layout['mapbox']['layers'].append(geo_layer)
 
-    data = dict(
-        # lat=df_structures['lat'],
-        # lon=df_structures['lon'],
-        lat=struct_dff['lat'],
-        lon=struct_dff['lon'],
-        customdata=customdatalist,
-        hoverinfo = 'text', # for adding hover info to buildings
-        # hoverinfo = 'none', # use this for testing, turns hover labels off
-        text=struct_dff[dropdownvalue],
-        type='scattermapbox',
-        marker=dict(
-            size=10
+        # SERVE PREBUILT GEOLAYER IS NO USER DEFINED WEIGHTING
+        else:
+            base_risk_url = repo_url + '/master/' #v2
+            for bin in BINS:
+                geo_layer = dict(
+                        sourcetype = 'geojson',
+                        source = base_risk_url + dropdownvalue + '/' + bin +  '.geojson',
+                        type ='fill',
+                        color = cm[bin],
+                        opacity = 1
+                )
+
+                layout['mapbox']['layers'].append(geo_layer)
+
+        # ADD STRUCTURE RISK DATA AS HOVER
+        data = dict(
+            # lat=df_structures['lat'],
+            # lon=df_structures['lon'],
+            lat=struct_dff['lat'],
+            lon=struct_dff['lon'],
+            customdata=customdatalist,
+            hoverinfo = 'text', # for adding hover info to buildings
+            # hoverinfo = 'none', # use this for testing, turns hover labels off
+            text=struct_dff[dropdownvalue],
+            type='scattermapbox',
+            marker=dict(
+                size=10
+            ),
+            opacity = 0,
         ),
-        opacity = 0,
-    ),
+    
+    else:
+        data = dict()
 
     figure = dict(data=data,layout=layout)
-    # t5 = time.time()
-    # print('prep map data Time: {:.2f} seconds'.format(round(t6 - t7, 2)))
-    # print('render all geolayers Time: {:.2f} seconds'.format(round(t5 - t6, 2)))
-    # print('TOTAL map callback Time: {:.2f} seconds'.format(round(t5 - t7, 2)))
     return figure
 
 
