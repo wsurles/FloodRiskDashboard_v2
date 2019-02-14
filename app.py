@@ -128,7 +128,7 @@ color = [
     '#013fa3', # 100yr color
     '#99ccff'] # 500yr color
 opacity = [
-    0.1,    # structures opacity
+    0.2,    # structures opacity
     # 0.4,  # census blocks opacity
     0,  # confidence opacity
     0.5,  # 100yr opacity
@@ -354,49 +354,49 @@ app.layout = html.Div(children=[
 
             html.Br(),
             html.Hr(),
-            html.H5(children="Map Controls"),
+            # html.H5(children="Map Controls"),
 
             # Structures colormap
-            html.Div([
-                html.Div([
-                    html.P(children='Structures Color Map',
-                        style={
-                            'font-size': '12px'}
-                        )
-                ], className='five columns', style={
-                    'margin-top': '10px',
-                }),
-                html.Div([
-                    dash_colorscales.DashColorscales(
-                        id='colorscale-picker',
-                        colorscale=DEFAULT_COLORSCALE,
-                        nSwatches=10,
-                        fixSwatches=True,
-                    ),
-                ]),
-            ], className="row"),
+            # html.Div([
+            #     html.Div([
+            #         html.P(children='Structures Color Map',
+            #             style={
+            #                 'font-size': '12px'}
+            #             )
+            #     ], className='five columns', style={
+            #         'margin-top': '10px',
+            #     }),
+            #     html.Div([
+            #         dash_colorscales.DashColorscales(
+            #             id='colorscale-picker',
+            #             colorscale=DEFAULT_COLORSCALE,
+            #             nSwatches=10,
+            #             fixSwatches=True,
+            #         ),
+            #     ]),
+            # ], className="row"),
 
             # Probablistic hexagon colormap
-            html.Div([
-                html.Div([
-                    html.P(children='Probabilistic Floodplain Color Map',
-                        style={
-                            'font-size': '12px'}
-                        )
-                ], className='five columns', style={
-                    'margin-top': '10px',
-                }),
-                html.Div([
-                    dash_colorscales.DashColorscales(
-                        id='colorscale-picker2',
-                        colorscale=DEFAULT_COLORSCALE_2,
-                        nSwatches=10,
-                        fixSwatches=True,
-                    ),
-                ]),
-            ], className="row"),
+            # html.Div([
+            #     html.Div([
+            #         html.P(children='Probabilistic Floodplain Color Map',
+            #             style={
+            #                 'font-size': '12px'}
+            #             )
+            #     ], className='five columns', style={
+            #         'margin-top': '10px',
+            #     }),
+            #     html.Div([
+            #         dash_colorscales.DashColorscales(
+            #             id='colorscale-picker2',
+            #             colorscale=DEFAULT_COLORSCALE_2,
+            #             nSwatches=10,
+            #             fixSwatches=True,
+            #         ),
+            #     ]),
+            # ], className="row"),
 
-            html.Hr(),
+            # html.Hr(),
 
             html.Div([
                 html.P(
@@ -601,48 +601,84 @@ app.layout = html.Div(children=[
     }
     ),
 
+    # Bottom div
+    html.Div([
+        html.Div([
+            html.H5(children="Map Controls"),
+        ], className='two columns', 
+        style={'vertical-align':'center'}
+        ),
+        html.Div([
+            # Structures colormap
+            html.Div([
+                dash_colorscales.DashColorscales(
+                    id='colorscale-picker',
+                    colorscale=DEFAULT_COLORSCALE,
+                    nSwatches=10,
+                    fixSwatches=True,
+                ),
+            ], style={
+                'display':'inline-block',
+                'vertical-align':'center',
+                'margin-top': '0px'}
+            ),
+            html.Div([
+                html.P(children='Structures Color Map',
+                    style={
+                        'font-size': '12px'}
+                    )
+            ], style={
+                'margin-top': '0px',
+                'vertical-align':'center',
+                'display':'inline-block'}
+            ),
+      
+        ], className='five columns'
+        ),
+
+        html.Div([
+            # Probabilistic floodplain colormap
+            html.Div([
+                dash_colorscales.DashColorscales(
+                    id='colorscale-picker2',
+                    colorscale=DEFAULT_COLORSCALE_2,
+                    nSwatches=10,
+                    fixSwatches=True,
+                ),
+            ], style={
+                'display':'inline-block',
+                'vertical-align':'center',
+                'margin-top': '0px'}
+            ),
+            html.Div([
+                html.P(children='Probabilistic Floodplain Color Map',
+                    style={
+                        'font-size': '12px'}
+                    )
+            ], style={
+                'margin-top': '0px',
+                'vertical-align':'center',
+                'display':'inline-block'}
+            ),
+      
+        ], className='five columns'
+        ),
+
+    ], className='twelve columns',
+    style={
+        'background-color':'white',
+        'border-radius': '3px', 
+        'padding':'10px',
+        # 'margin-top':'5px',
+        'margin-bottom':'5px',
+        'display':'flex',
+        'width':'100%'
+    }
+    ),
     # debugging text, comment out after testing
     # html.Pre(id='relayout-message', style=styles['pre']),
     # html.Img(src=' ', id='image'),
     
-    # html.Div([
-    #     dcc.Graph(
-    #         id='risk-map',
-    #         figure=dict(
-    #             data = dict(
-    #                 lat=df_structures['lat'],
-    #                 lon=df_structures['lon'],
-    #                 # hoverinfo = 'text', # for adding hover info to buildings
-    #                 hoverinfo = 'none', # use this for testing, turns hover labels off
-    #                 customdata=customdatalist,
-    #                 text=df_structures['R_SCORE'],
-    #                 type='scattermapbox',
-    #                 marker=dict(
-    #                     size=1
-    #                 ),
-    #                 opacity = 0,
-    #             ),
-    #             layout = dict(
-    #                 # height = 600,
-    #                 # height = 1500,
-    #                 mapbox = dict(
-    #                     layers = [],
-    #                     accesstoken = mapbox_access_token,
-    #                     style = mapboxstyle,
-    #                     center=dict(
-    #                         lat=39.7093,
-    #                         lon=-105.05555           
-    #                     ),
-    #                     pitch=0,
-    #                     zoom=12
-    #                 )
-    #             )
-    #         ),
-    #         style = {
-    #             'height': '600',
-    #         }
-    #     )
-    # ], className="row"),    
 ], className='ten columns offset-by-one')
 
 
@@ -745,6 +781,7 @@ def display_click_data(value, clickData, state1, state2, state3):
             f"Flood Damage Potential: {floodDamage}" + '\n' + \
             f"User Defined Risk Score: {userRisk}"
         return click_message
+        # print(df_structures.loc[df_structures.OBJECTID==structFID].info())
         # return json.dumps(clickData, indent=2)
 
 
@@ -934,13 +971,14 @@ def update_bar_chart(clickData, colorscale):
         Input('structurebasedrisk_dropdown','value'), # structure risk type selection
         Input('confidence-slider', 'value'), # confidence contour selection
         Input('colorscale-picker', 'colorscale'), # structures color picker
-        Input('colorscale-picker2', 'colorscale')], # heatmap color picker
+        Input('colorscale-picker2', 'colorscale'),  # heatmap color picker
+        Input('risk-map', 'clickData')], # click data from user selection
 		[State('risk-map', 'relayoutData'), # state of zoom
         State('FRTOT-numericinput','value'), # state of user input
         State('AEPTOT-numericinput', 'value'), # state of user input
         State('FDPTOT-numericinput', 'value')]) # state of user input
 def display_map(radiovalue, deterministicvalues, values, checklist2values, dropdownvalue, 
-    value, colorscale, colorscale2, relayoutData, FRstate, AEPstate, FDPstate):
+    value, colorscale, colorscale2, clickData, relayoutData, FRstate, AEPstate, FDPstate):
 
     # COLORS
     cm = dict(zip(BINS, colorscale)) # structures color dictionary
@@ -1103,6 +1141,25 @@ def display_map(radiovalue, deterministicvalues, values, checklist2values, dropd
                 )
 
                 layout['mapbox']['layers'].append(geo_layer)
+
+        # ADD BUILDING HIGHLIGHT IF CLICK DATA != NONE
+        if clickData==None:
+            pass
+        else: 
+            structFID = clickData['points'][0]['pointNumber']
+            structFID = structFID+1
+            single_struct = struct_dff.loc[struct_dff.OBJECTID==structFID]
+            struct_json = json.loads(single_struct.to_json())
+
+            geo_layer = dict(
+                sourcetype = 'geojson',
+                source = struct_json,
+                type ='line',
+                line = {'width': '10px'},
+                color = '#16FBFF',
+                opacity = 1
+            )
+            layout['mapbox']['layers'].append(geo_layer)
 
         # ADD STRUCTURE RISK DATA AS HOVER
         data = dict(
