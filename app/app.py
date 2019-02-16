@@ -48,7 +48,8 @@ server = app.server
 app.config['suppress_callback_exceptions']=True
 
 # Set mapbox public access token
-mapbox_access_token = 'pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A'
+#mapbox_access_token = 'pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A'
+mapbox_access_token = 'pk.eyJ1Ijoid2lsbGlhbXN1cmxlcyIsImEiOiJjanM3MmYwajcwNHZ2M3lwYThhOWdwaXZxIn0.pSbXHJdxJ6f12vf-aACSeg'
 
 # Set google key
 key = "&key=" + "AIzaSyDbo5FlMFzns5OzeuW1TA7dOikvEuF-eYI" #key
@@ -101,12 +102,12 @@ DEFAULT_COLORSCALE_2 = ['rgb(3, 35, 51)', 'rgb(18, 50, 113)', 'rgb(73, 54, 159)'
 #     'rgb(92, 185, 163)', 'rgb(77, 156, 160)', 'rgb(67, 128, 154)', 'rgb(61, 99, 148)', \
 #     'rgb(65, 69, 130)', 'rgb(57, 46, 85)', 'rgb(39, 26, 44)']
 
-# mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
-# mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
+#mapboxstyle = 'mapbox://styles/mapbox/satellite-streets-v9' #satellite streets
+#mapboxstyle = 'mapbox://styles/mapbox/dark-v9' # dark
 mapboxstyle = 'mapbox://styles/mapbox/light-v9' # light
-# mapboxstyle = 'mapbox://styles/indielyt/cjreghq012thv2ssdb6mbfguu'
-# mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
-# mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
+#mapboxstyle = 'mapbox://styles/indielyt/cjreghq012thv2ssdb6mbfguu'
+#mapboxstyle = 'mapbox://styles/mapbox/outdoors-v9' # outdoors
+#mapboxstyle = 'https://api.mapbox.com/styles/v1/indielyt/cjreghq012thv2ssdb6mbfguu.html?fresh=true&title=true&access_token=pk.eyJ1IjoiaW5kaWVseXQiLCJhIjoiY2pkcXZyMGZpMDB6NzJxbGw4aXdvb2w3bCJ9.sL_EzvrSj83Y0Hi1_6GT6A#10.0/42.362400/-71.020000/0'
 
 # Define symbology for json layers
 geo_index = [
@@ -197,14 +198,9 @@ customdatalist = [df_structures['R_SCORE'], df_structures['FR_TOT'], df_structur
 
 
 
-
-
-'''
-~~~~~~~~~~~~~~~~
-~~ APP LAYOUT ~~
-~~~~~~~~~~~~~~~~
-'''
-
+##|----------------------------------------------
+##| APP LAYOUT
+##|----------------------------------------------
 
 
 
@@ -281,7 +277,7 @@ app.layout = html.Div(children=[
                 )
             ),
             style = {
-                'height': '500',
+                'height': '760',
                 # 'border-radius' : '3px'
             }
         )
@@ -290,7 +286,6 @@ app.layout = html.Div(children=[
         'margin-top' : '5px',
         'border-radius' : '3px'
     }), 
-    # html.Br(),
 
     # Flood hazard risk controls
     html.Div([
@@ -354,49 +349,6 @@ app.layout = html.Div(children=[
 
             html.Br(),
             html.Hr(),
-            # html.H5(children="Map Controls"),
-
-            # Structures colormap
-            # html.Div([
-            #     html.Div([
-            #         html.P(children='Structures Color Map',
-            #             style={
-            #                 'font-size': '12px'}
-            #             )
-            #     ], className='five columns', style={
-            #         'margin-top': '10px',
-            #     }),
-            #     html.Div([
-            #         dash_colorscales.DashColorscales(
-            #             id='colorscale-picker',
-            #             colorscale=DEFAULT_COLORSCALE,
-            #             nSwatches=10,
-            #             fixSwatches=True,
-            #         ),
-            #     ]),
-            # ], className="row"),
-
-            # Probablistic hexagon colormap
-            # html.Div([
-            #     html.Div([
-            #         html.P(children='Probabilistic Floodplain Color Map',
-            #             style={
-            #                 'font-size': '12px'}
-            #             )
-            #     ], className='five columns', style={
-            #         'margin-top': '10px',
-            #     }),
-            #     html.Div([
-            #         dash_colorscales.DashColorscales(
-            #             id='colorscale-picker2',
-            #             colorscale=DEFAULT_COLORSCALE_2,
-            #             nSwatches=10,
-            #             fixSwatches=True,
-            #         ),
-            #     ]),
-            # ], className="row"),
-
-            # html.Hr(),
 
             html.Div([
                 html.P(
@@ -687,15 +639,9 @@ app.layout = html.Div(children=[
 
 
 
-
-
-'''
-~~~~~~~~~~~~~~~~
-~~ APP CALLBACKS ~~
-~~~~~~~~~~~~~~~~
-'''
-
-
+##|----------------------------------------------
+##| APP CALLBACKS
+##|----------------------------------------------
 
 
 
@@ -873,6 +819,7 @@ def hide_slider(values):
     Output('slider-message', 'children'),
     [Input('confidence-slider', 'value'),
     Input('risk-checklist', 'values')])
+
 def update_slider_message(value, values):
     if 'S_Confidence' in values:
         return 'Displaying the {} percent confidence interval for the 100-year floodplain boundary'.format(value)
@@ -888,6 +835,7 @@ def update_slider_message(value, values):
     [Input('risk-map', 'clickData'),
     # Input('risk-map', 'figure'),
     Input('colorscale-picker', 'colorscale')])
+
 def update_bar_chart(clickData, colorscale):
     # cm = dict(zip(BINS, colorscale))
 
@@ -977,6 +925,7 @@ def update_bar_chart(clickData, colorscale):
         State('FRTOT-numericinput','value'), # state of user input
         State('AEPTOT-numericinput', 'value'), # state of user input
         State('FDPTOT-numericinput', 'value')]) # state of user input
+
 def display_map(radiovalue, deterministicvalues, values, checklist2values, dropdownvalue, 
     value, colorscale, colorscale2, clickData, relayoutData, FRstate, AEPstate, FDPstate):
 
@@ -999,12 +948,8 @@ def display_map(radiovalue, deterministicvalues, values, checklist2values, dropd
         zoom=16
 
     # LEGEND, TITLE, AND LOCATION
-    title_dict = {'R_SCORE': 'Total Risk Score (R_SCORE)', 
-        'FR_TOT': 'Flood Risk (FR_TOT)',
-        'AEP_TOT': '100-Year Exceedence Probability (EP_TOT)', 
-        'FDP_TOT': 'Flood Damage Potential (FDP_TOT)',
-        'USER': 'User Defined Weighting'}
     legendtitle = '<b>' + 'Structure Based Flood Risk' + '</b>'
+    
     annotations = [dict(
         showarrow = False,
         align = 'left',
@@ -1012,6 +957,7 @@ def display_map(radiovalue, deterministicvalues, values, checklist2values, dropd
         x = 0.02, # legend title location (% from left)
         y = 0.98, # legend title location (% from bottom)
 	)]
+    
     for i, bin in enumerate(BINS):
         color = cm[bin]
         annotations.append(
@@ -1201,4 +1147,4 @@ def display_map(radiovalue, deterministicvalues, values, checklist2values, dropd
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True, port=8050)
